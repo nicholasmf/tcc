@@ -73,3 +73,11 @@
         transform: translateY(0);
     }
 }
+
+.background-info {
+    background-color: #d9edf7;
+}
+
+.background-success {
+    background-color: #dff0d8;
+}

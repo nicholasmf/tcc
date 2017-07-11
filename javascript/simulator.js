@@ -34,50 +34,27 @@ function Simulator() {
         // Execute
         var pc = 0, lastPc = -1;
         execution = setInterval(function() {
-            // if (instructionsList.children[pc]) {
-            //     var instruction = instructionsList.children[pc];
-            //     instruction.className += " list-group-item-info";
-            // }
-
-            // if (instructionsList.children[lastPc]) {
-            //     var lastInstruction = instructionsList.children[lastPc];
-            //     $(lastInstruction).removeClass('list-group-item-info');
-            //     $(lastInstruction).addClass('list-group-item-success');
-            // }
-
-            // lastPc = pc;
-            // if (instructions[pc] && instructions[pc].type === DATA_TYPES.CONTROL) {
-            //     var instruction = instructions[pc];
-            //     if (instruction.branchResult) {
-            //         pc = instruction.branchTo;
-            //     }
-            //     else {
-            //         pc++;
-            //     }
-            // }
-            // else {
-            //     pc++;
-            // }
-
-            // if (lastPc === instructions.length) {
-            //     clearInterval(execution);
-            // }
-            self.fetchStep(pc < instructions.length ? pc : -1);
+            var instruction = self.fetchStep((pc < instructions.length ? pc : -1), instructions);
             self.decode();
             self.load();
-            self.execute();
+            var result = self.execute(instruction);
             self.store();
             self.end(execution, pc);
-            pc++;
+            if (result.pc) {
+                pc = result.pc;
+            }
+            else {
+                pc++;
+            }
         }, 1000);
     }
 
-    this.fetchStep = function(pc) {
+    this.fetchStep = function(pc, instructions) {
         if (pc > -1) {
             var instruction = self.instructions[pc];
             var pipeline = $(".pipeline");
             var instructionList = $("#instructions");
-            var instructionElem = $("<div class='pipeline-item fetch'>" + instruction.name + "</div>");
+            var instructionElem = $("<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>");
 
             var elem = instructionList.children(":eq(0)");
             elem.addClass("out");
@@ -85,6 +62,11 @@ function Simulator() {
                 elem.detach();
                 pipeline.append(instructionElem);
             }, 100);
+
+            return instructions[pc];
+        }
+        else { 
+            return null;
         }
     }
 
@@ -110,15 +92,27 @@ function Simulator() {
         }
     }
 
-    this.execute = function() {
+    this.execute = function(instruction) {
+        var result = {};
+
         var count = $(".load").length;
         var instruction = $(".load:eq(0)");
         if (count) {
             setTimeout(function() {
                 instruction.removeClass("load");
+                instruction.removeClass("background-info");
                 instruction.addClass("execute");
+                instruction.addClass("background-success");
             }, 100);
         }
+
+        if (instruction && instruction.type === DATA_TYPES.CONTROL) {
+            if (instruction.branchResult) {
+                result.pc = instruction.branchTo;
+            }
+        }
+
+        return result;
     }
 
     this.store = function() {
@@ -138,6 +132,10 @@ function Simulator() {
         var pipeline = $(".pipeline");
         var instructionList = $("#finalList");
         var instructionElem = $("<li class='list-group-item'>" + instruction.text() + "</li>");
+
+        if (instruction.hasClass("background-success")) {
+            instructionElem.addClass("list-group-item-success");
+        }
 
         if (count) {
             instruction.addClass("out");
