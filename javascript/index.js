@@ -4,6 +4,7 @@ var iSet;
 var code = [];
 
 function start() {
+	simulator.clear();
     simulator.run(iSet, code);
 }
 
@@ -30,6 +31,21 @@ function setInstructionset() {
     }
     else if (value === "test2") {
         iSet = Test2InstructionSet;
+		
+		code = [
+            iSet.ADD,
+            iSet.SUB,
+            iSet.BRANCH_TRUE,
+            iSet.LOAD,
+            iSet.ADD,
+            iSet.LOAD,
+            iSet.ADD,
+            iSet.ADD,
+            iSet.BRANCH_FALSE,
+            iSet.ADD,
+            iSet.LOAD
+        ];
+		console.log(code);
     }
     else {
         iSet = null;

@@ -2,11 +2,20 @@
 
 function Simulator() {
     var self = this;
-
+	var execution;
     this.clear = function() {
-
+		var pipeline = document.getElementsByClassName("pipeline")[0];
+		var instructions = document.getElementById("instructions");
+		var finalList = document.getElementById("finalList");
+		if(execution) {
+			clearInterval(execution);
+			pipeline.innerHTML = "";
+			instructions.innerHTML = "";
+			finalList.innerHTML = "";
+			//$(pipeline).html("");
+			//$(".pipeline").html("");
+		}
     }
-
     this.run = function(instructionSet, instructions) {
         if (!instructionSet || !instructions) { return; }
 
@@ -24,7 +33,7 @@ function Simulator() {
 
         // Execute
         var pc = 0, lastPc = -1;
-        var execution = setInterval(function() {
+        execution = setInterval(function() {
             // if (instructionsList.children[pc]) {
             //     var instruction = instructionsList.children[pc];
             //     instruction.className += " list-group-item-info";
@@ -75,7 +84,7 @@ function Simulator() {
             setTimeout(function() {
                 elem.detach();
                 pipeline.append(instructionElem);
-            }, 900);
+            }, 100);
         }
     }
 
@@ -135,7 +144,7 @@ function Simulator() {
             setTimeout(function() {
                 instruction.detach();
                 instructionList.append(instructionElem);
-            }, 900);
+            }, 100);
         }
         else if (pc === -1) {
             clearInterval(interval);
