@@ -3,7 +3,13 @@
 function Simulator() {
     var self = this;
 
+    this.clear = function() {
+
+    }
+
     this.run = function(instructionSet, instructions) {
+        if (!instructionSet || !instructions) { return; }
+
         self.instructionSet = instructionSet;
         self.instructions = instructions;
 
