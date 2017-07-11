@@ -14,7 +14,7 @@ window.onload = function() {
         iSet.BRANCH_FALSE,
         iSet.ADD,
         iSet.LOAD
-    ]
+    ];
 	
     simulator.run(TestInstructionSet, code);
 };

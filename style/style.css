@@ -1,0 +1,75 @@
+#instructions li {
+    opacity: 1;
+    transition-duration: 2s;
+    left: 0;
+}
+
+#instructions li.out {
+    left: 130%;
+    transform: scale(0, 1);
+}
+
+.pipeline-item {
+    top: 52px;
+    width: 42px;
+    height: 42px;
+    border-radius: 5px;
+    box-shadow: 0 1px 2px 0 grey;
+    border: 1px solid lightgrey;
+    font-size: 10px;
+    vertical-align: center;
+    text-align: center;
+    position: absolute;
+    transition: all 1s ease-in-out;
+
+    animation-name: pipeline-item-in;
+    animation-duration: .2s;
+}
+
+@keyframes pipeline-item-in {
+    from {
+        transform: scale(2, 1);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+.pipeline-item.fetch {
+    left: 10%;
+}
+
+.pipeline-item.decode {
+    left: 30%;
+}
+
+.pipeline-item.load {
+    left: 50%;
+}
+
+.pipeline-item.execute {
+    left: 70%;
+}
+
+.pipeline-item.store {
+    left: 90%;
+}
+
+.pipeline-item.out {
+    left: 100%;
+    opacity: 0;
+}
+
+#finalList li {
+    animation-name: final-list-in;
+    animation-duration: 1s;
+}
+
+@keyframes final-list-in {
+    from {
+        transform: translateY(-100px);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
