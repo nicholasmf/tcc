@@ -53,18 +53,18 @@ function Simulator() {
             // if (lastPc === instructions.length) {
             //     clearInterval(execution);
             // }
-            self.fetchStep(pc < instructions.length ? pc : 0);
+            self.fetchStep(pc < instructions.length ? pc : -1);
             self.decode();
             self.load();
             self.execute();
             self.store();
-            self.end(execution);
+            self.end(execution, pc);
             pc++;
         }, 1000);
     }
 
     this.fetchStep = function(pc) {
-        if (pc) {
+        if (pc > -1) {
             var instruction = self.instructions[pc];
             var pipeline = $(".pipeline");
             var instructionList = $("#instructions");
@@ -83,51 +83,62 @@ function Simulator() {
         var count = $(".fetch").length;
         var instruction = $(".fetch:eq(0)");
         if (count) {
-            instruction.removeClass("fetch");
-            instruction.addClass("decode");
+            setTimeout(function() {
+                instruction.removeClass("fetch");
+                instruction.addClass("decode");
+            }, 100)
         }
     }
 
     this.load = function() {
         var count = $(".decode").length;
         var instruction = $(".decode:eq(0)");
-        if (count > 1) {
-            instruction.removeClass("decode");
-            instruction.addClass("load");
+        if (count) {
+            setTimeout(function() {
+                instruction.removeClass("decode");
+                instruction.addClass("load");
+            }, 100);
         }
     }
 
     this.execute = function() {
         var count = $(".load").length;
         var instruction = $(".load:eq(0)");
-        if (count > 1) {
-            instruction.removeClass("load");
-            instruction.addClass("execute");
+        if (count) {
+            setTimeout(function() {
+                instruction.removeClass("load");
+                instruction.addClass("execute");
+            }, 100);
         }
     }
 
     this.store = function() {
         var count = $(".execute").length;
         var instruction = $(".execute:eq(0)");
-        if (count > 1) {
-            instruction.removeClass("execute");
-            instruction.addClass("store");
+        if (count) {
+            setTimeout(function() {
+                instruction.removeClass("execute");
+                instruction.addClass("store");
+            }, 100);
         }
     }
 
-    this.end = function() {
+    this.end = function(interval, pc) {
         var count = $(".store").length;
         var instruction = $(".store:eq(0)");
         var pipeline = $(".pipeline");
         var instructionList = $("#finalList");
         var instructionElem = $("<li class='list-group-item'>" + instruction.text() + "</li>");
 
-        if (count > 1) {
+        if (count) {
             instruction.addClass("out");
             setTimeout(function() {
                 instruction.detach();
                 instructionList.append(instructionElem);
             }, 900);
+        }
+        else if (pc === -1) {
+            clearInterval(interval);
         }
     }
 }
