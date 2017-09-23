@@ -1,8 +1,39 @@
 "use strict";
 
+/******** Pipeline steps *********
+ * Fetch
+ * Decode
+ * Register allocation and renaming
+ * microop reordering
+ * execution
+ * retirement
+ */
+
 function Simulator() {
     var self = this;
-	var execution;
+    var execution;
+    
+    this.registers = 64;
+    this.tempRegisters = 256;
+
+    this.registersArray = [];
+    this.tempRegistersArray = [];
+
+    /********* Simulator params
+     * registers: number of registers available
+     * tempRegisters: number of temporary registers available
+     */
+    this.init = function(params) {
+        this.registers = params.registers || 64;
+        this.tempRegisters = params.registers || 256;
+
+        this.registersArray = new Array(this.registers);
+        this.tempRegistersArray = new Array(this.tempRegisters);
+
+        this.renderRegistersBank();
+    }
+
+    /******************** Clear lists, pipeline and memory *****************/
     this.clear = function() {
 		var pipeline = document.getElementsByClassName("pipeline")[0];
 		var instructions = document.getElementById("instructions");
@@ -16,7 +47,10 @@ function Simulator() {
 			//$(".pipeline").html("");
 		}
     }
+
     this.run = function(instructionSet, instructions) {
+        var p1 = new P1();
+        console.log(p1.name);
         if (!instructionSet || !instructions) { return; }
 
         self.instructionSet = instructionSet;
@@ -49,6 +83,7 @@ function Simulator() {
         }, 1000);
     }
 
+    /*************** Fetch *********************/
     this.fetchStep = function(pc, instructions) {
         if (pc > -1) {
             var instruction = self.instructions[pc];
@@ -70,6 +105,7 @@ function Simulator() {
         }
     }
 
+    /***************** Decode *********************/
     this.decode = function() {
         var count = $(".fetch").length;
         var instruction = $(".fetch:eq(0)");

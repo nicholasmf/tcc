@@ -45,7 +45,6 @@ function setInstructionset() {
             iSet.ADD,
             iSet.LOAD
         ];
-		console.log(code);
     }
     else {
         iSet = null;

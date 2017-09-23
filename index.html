@@ -4,9 +4,35 @@
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Simulador</title>
+
+        <!-- Firebase -->
+        <script src="https://www.gstatic.com/firebasejs/4.3.0/firebase.js"></script>
+        <script>
+          // Initialize Firebase
+          var config = {
+            apiKey: "AIzaSyD85l3Fj4FVrqcB-23_tt7rqqfaIzQnmDU",
+            authDomain: "tcc1-49d26.firebaseapp.com",
+            databaseURL: "https://tcc1-49d26.firebaseio.com",
+            projectId: "tcc1-49d26",
+            storageBucket: "",
+            messagingSenderId: "454052950426"
+          };
+          firebase.initializeApp(config);
+        </script>
+        <!-- Jquery and Bootstrap -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        
+        <!-- Database handler -->
+        <script type="text/javascript" src="./javascript/firebase_handler.js"></script>
+
+        <!-- Processors -->
+        <script type="text/javascript" src="./javascript/processors/p1/pipeline.js"></script>
+
+        <!-- Branch Predictors -->
+        <script type="text/javascript" src="./javascript/processors/p1/branch-prediction.js"></script>
+
         <!-- Simulator script -->
         <script type="text/javascript" src="./javascript/simulator.js"></script>
 
