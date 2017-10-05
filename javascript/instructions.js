@@ -12,7 +12,8 @@ function InstructionSet() {
 function Instruction (name, type, MicroInstruction, params) {
     this.name = name;
     this.type = type;
-	this.MicroInstruction = MicroInstruction;
+    this.MicroInstruction = MicroInstruction;
+    this.params = params;
     if (params) {
         this.branchResult = params.branchResult;
         this.branchTo = params.branchTo;

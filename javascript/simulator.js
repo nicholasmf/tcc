@@ -9,8 +9,24 @@
  * retirement
  */
 
+ // check if a var is an object
+function isObject(elem) {
+    return (elem !== null && typeof elem === 'object');
+}
+
+function Register() {
+    const register = this;
+    this.value = 0;
+    this.get = function() {
+        return register.value;
+    }
+    this.set = function(value) {
+        register.value = value;
+    }
+}
+
 function Simulator() {
-    var self = this;
+    const sim = this;
     var execution;
     
     this.registers = 64;
@@ -18,6 +34,11 @@ function Simulator() {
 
     this.registersArray = [];
     this.tempRegistersArray = [];
+    for (let i = 0; i < this.tempRegisters; i++) {
+        this.tempRegistersArray[i] = new Register();
+    }
+    
+    this.fillNoop = 0;
 
     /********* Simulator params
      * registers: number of registers available
@@ -53,8 +74,8 @@ function Simulator() {
         console.log(p1.name);
         if (!instructionSet || !instructions) { return; }
 
-        self.instructionSet = instructionSet;
-        self.instructions = instructions;
+        sim.instructionSet = instructionSet;
+        sim.instructions = instructions;
 
         // Render
         var instructionsList = document.getElementById("instructions");
@@ -68,14 +89,17 @@ function Simulator() {
         // Execute
         var pc = 0, lastPc = -1;
         execution = setInterval(function() {
-            var instruction = self.fetchStep((pc < instructions.length ? pc : -1), instructions);
-            self.decode();
-            self.load();
-            var result = self.execute(instruction);
-            self.store();
-            self.end(execution, pc);
+            var instruction = sim.fetchStep((pc < instructions.length ? pc : -1), instructions);
+            sim.decode();
+            sim.load(instruction);
+            var result = sim.execute(instruction);
+            sim.store();
+            sim.end(execution, pc);
             if (result.pc) {
                 pc = result.pc;
+            }
+            else if (sim.fillNoop > 0) {
+                sim.fillNoop--;
             }
             else {
                 pc++;
@@ -83,20 +107,47 @@ function Simulator() {
         }, 1000);
     }
 
+    this.flush = function(cicles) {
+        console.log(cicles);
+        sim.fillNoop = cicles;
+    }
+
     /*************** Fetch *********************/
     this.fetchStep = function(pc, instructions) {
-        if (pc > -1) {
-            var instruction = self.instructions[pc];
-            var pipeline = $(".pipeline");
+        var pipeline = $(".pipeline");
+        if (this.fillNoop > 0) {
+            var instructionElem = $("<div class='pipeline-item background-danger fetch'>NoOp</div>");
+            setTimeout(function() {
+                //elem.detach();
+                pipeline.append(instructionElem);
+            }, 100);
+            return new Instruction("NoOp");
+        }
+        else if (pc > -1) {
+            var instruction = sim.instructions[pc];
             var instructionList = $("#instructions");
             var instructionElem = $("<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>");
 
-            var elem = instructionList.children(":eq(0)");
-            elem.addClass("out");
+            //var elem = instructionList.children(":eq(0)");
+            //elem.addClass("out");
             setTimeout(function() {
-                elem.detach();
+                //elem.detach();
                 pipeline.append(instructionElem);
             }, 100);
+
+            if (instruction.name === "SET") {
+                var source = instruction.params.source;
+                var dest = instruction.params.dest;
+    
+                source = isObject(source) ? source.get() : source;
+    
+                if (!isNaN(source)) {
+                    dest.set(source);
+                }
+                else {
+                    dest.set(0);
+                }
+            }
 
             return instructions[pc];
         }
@@ -132,19 +183,28 @@ function Simulator() {
         var result = {};
 
         var count = $(".load").length;
-        var instruction = $(".load:eq(0)");
+        var elem = $(".load:eq(0)");
         if (count) {
             setTimeout(function() {
-                instruction.removeClass("load");
-                instruction.removeClass("background-info");
-                instruction.addClass("execute");
-                instruction.addClass("background-success");
+                elem.removeClass("load");
+                elem.addClass("execute");
+
+                if (elem.hasClass("background-info")) {
+                    elem.removeClass("background-info");
+                    elem.addClass("background-success");                    
+                }
             }, 100);
         }
 
         if (instruction && instruction.type === DATA_TYPES.CONTROL) {
+            if (instruction.name === "BRANCH IF ZERO") {
+                var source = instruction.params.source;
+                source = isObject(source) ? source.get() : source;
+                instruction.branchResult = source === 0;
+            }
             if (instruction.branchResult) {
                 result.pc = instruction.branchTo;
+                this.flush(3);
             }
         }
 
@@ -171,6 +231,9 @@ function Simulator() {
 
         if (instruction.hasClass("background-success")) {
             instructionElem.addClass("list-group-item-success");
+        }
+        if (instruction.hasClass("background-danger")) {
+            instructionElem.addClass("list-group-item-danger");
         }
 
         if (count) {
