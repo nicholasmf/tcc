@@ -93,9 +93,9 @@ function Simulator() {
             sim.decode();
             sim.load(instruction);
             var result = sim.execute(instruction);
-            sim.store();
+            sim.store(instruction, result);
             sim.end(execution, pc);
-            if (result.pc) {
+            if (result.pc != null && result.pc != undefined) {
                 pc = result.pc;
             }
             else if (sim.fillNoop > 0) {
@@ -108,7 +108,6 @@ function Simulator() {
     }
 
     this.flush = function(cicles) {
-        console.log(cicles);
         sim.fillNoop = cicles;
     }
 
@@ -195,15 +194,16 @@ function Simulator() {
                 }
             }, 100);
         }
-
+        if(instruction && instruction.type === DATA_TYPES.ARITHMETIC)
+        {
+            result.ula = instruction.executethis();
+        }
         if (instruction && instruction.type === DATA_TYPES.CONTROL) {
             if (instruction.name === "BRANCH IF ZERO") {
-                var source = instruction.params.source;
-                source = isObject(source) ? source.get() : source;
-                instruction.branchResult = source === 0;
+                instruction.executethis();
             }
-            if (instruction.branchResult) {
-                result.pc = instruction.branchTo;
+            if (instruction.params.branchResult) {
+                result.pc = instruction.getTargetAddr();
                 this.flush(3);
             }
         }
@@ -211,14 +211,18 @@ function Simulator() {
         return result;
     }
 
-    this.store = function() {
+    this.store = function(instruction, result) {
         var count = $(".execute").length;
-        var instruction = $(".execute:eq(0)");
+        var elem = $(".execute:eq(0)");
         if (count) {
             setTimeout(function() {
-                instruction.removeClass("execute");
-                instruction.addClass("store");
+                elem.removeClass("execute");
+                elem.addClass("store");
             }, 100);
+        }
+        if(instruction && instruction.type === DATA_TYPES.ARITHMETIC)
+        {
+            instruction.params.op1.set(result.ula);
         }
     }
 

@@ -21,17 +21,17 @@ function setInstructionset() {
         iSet = TestInstructionSet;
 
         code = [
-            iSet.ADD,
-            iSet.SET(T0, 0),
-            iSet.BRANCH_IF_ZERO(T0, 7),
-            iSet.LOAD,
-            iSet.ADD,
-            iSet.LOAD,
-            iSet.ADD,
-            iSet.ADD,
-            iSet.BRANCH_FALSE,
-            iSet.ADD,
-            iSet.LOAD
+            iSet.SET(T0, -1),
+            iSet.ADD(T0, 1),
+            iSet.BRANCH_IF_ZERO(T0, 1),
+            iSet.LOAD(),
+            iSet.ADD(),
+            iSet.LOAD(),
+            iSet.ADD(),
+            iSet.ADD(),
+            iSet.BRANCH_FALSE(),
+            iSet.ADD(),
+            iSet.LOAD()
         ];
     }
     else if (value === "test2") {
@@ -56,3 +56,7 @@ function setInstructionset() {
         code = null;
     }
 }
+
+TestInstructionSet.ADD(T0, 2).executethis();
+TestInstructionSet.ADD(T1, 6).executethis();
+TestInstructionSet.ADD(T0, T1).executethis();

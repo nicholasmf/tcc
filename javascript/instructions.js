@@ -9,14 +9,23 @@ function InstructionSet() {
 	
 }
 
-function Instruction (name, type, MicroInstruction, params) {
+function Instruction (name, type, MicroInstruction, params, executethis) {
     this.name = name;
     this.type = type;
     this.MicroInstruction = MicroInstruction;
     this.params = params;
+    this.executethis = executethis;
     if (params) {
         this.branchResult = params.branchResult;
         this.branchTo = params.branchTo;
+    }
+    if(type === DATA_TYPES.CONTROL)
+    {//se a instrucao for do tipo controle, ela tera um metodo especial que retorna o endereco de destino
+        var instruction = this;
+        this.getTargetAddr = function() 
+        {
+            return instruction.params.branchTo;
+        }
     }
 }
 
