@@ -98,8 +98,9 @@ function Simulator() {
 			if(btbResult && decodeI.type === DATA_TYPES.CONTROL)
 			{
 				instruction = sim.fetchStep(btbResult, instructions)
-				instruction.btbResult = btbResult !== undefined ? true : false;
+				decodeI.btbResult = true;
 				pc = btbResult;
+				console.log("btbResult:" + btbResult);
 			}
 			else if(pc < instructions.length)
 			{
@@ -109,6 +110,11 @@ function Simulator() {
 			{
 				instruction = sim.fetchStep(-1, instructions);
 			}
+			if(!btbResult && instruction && decodeI)
+			{
+				decodeI.btbResult = false;
+			}
+			console.log("T0: " + T0.get() + " T1:" + T1.get());
 			
 			sim.decode();
             sim.load(loadI);
@@ -164,20 +170,6 @@ function Simulator() {
                 pipeline.append(instructionElem);
             }, 100);//talvez nao precise de delay
 
-            if (instruction.name === "SET") {
-                var source = instruction.params.source;
-                var dest = instruction.params.dest;
-    
-                source = isObject(source) ? source.get() : source;
-    
-                if (!isNaN(source)) {
-                    dest.set(source);
-                }
-                else {
-                    dest.set(0);
-                }
-            }
-
             return instructions[pc];//retorna a instrucao na posicao pc
         }
         else { 
@@ -227,6 +219,21 @@ function Simulator() {
         }
 		if(isFlushing)
 		{
+			
+			if (instruction.name === "SET") {
+                var source = instruction.params.source;
+                var dest = instruction.params.dest;
+    
+                source = isObject(source) ? source.get() : source;
+    
+                if (!isNaN(source)) {
+                    dest.set(source);
+                }
+                else {
+                    dest.set(0);
+                }
+            }
+			
 			if(instruction && instruction.type === DATA_TYPES.ARITHMETIC)
 			{
 				result.ula = instruction.executethis();

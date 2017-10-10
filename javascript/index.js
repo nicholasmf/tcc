@@ -21,30 +21,37 @@ function setInstructionset() {
         iSet = TestInstructionSet;
 
         code = [
-            iSet.SET(T0, -1),
-            iSet.ADD(T0, 1),
-            iSet.BRANCH_IF_ZERO(T0, 1),
+            iSet.SET(T0, 0),
+            iSet.BRANCH_IF_ZERO(T0, 5),
             iSet.LOAD(),
-            iSet.ADD(T1, 3),
             iSet.LOAD(),
-            iSet.ADD(T1, T0)
+			iSet.LOAD(),
+			iSet.SET(T1, -4),
+            iSet.ADD(T1, 1),
+			iSet.BRANCH_IF_ZERO(T1, 9),
+			iSet.BRANCH_IF_ZERO(T0, 6),
+			iSet.SET(T0, 1),
+			iSet.LOAD(),
+			iSet.LOAD(),
+			iSet.LOAD(),
+			
         ];
     }
     else if (value === "test2") {
         iSet = Test2InstructionSet;
 		
 		code = [
-            iSet.ADD,
-            iSet.SUB,
-            iSet.BRANCH_TRUE,
-            iSet.LOAD,
-            iSet.ADD,
-            iSet.LOAD,
-            iSet.ADD,
-            iSet.ADD,
-            iSet.BRANCH_FALSE,
-            iSet.ADD,
-            iSet.LOAD
+            iSet.SET(T0, 0),
+            iSet.BRANCH_IF_ZERO(T0, 5),
+            iSet.LOAD(),
+            iSet.LOAD(),
+			iSet.LOAD(),
+			iSet.SET(T1, -4),
+            iSet.ADD(T1, 1),
+			iSet.BRANCH_IF_ZERO(T1, 9),
+			iSet.BRANCH_IF_ZERO(T0, 5),
+			iSet.SET(T0, 1),
+			iSet.BRANCH_IF_ZERO(T0, 5),
         ];
     }
     else {
