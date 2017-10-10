@@ -40,6 +40,7 @@ function Simulator() {
     
     this.fillNoop = 0;
 
+	this.BTB = new BTB();
     /********* Simulator params
      * registers: number of registers available
      * tempRegisters: number of temporary registers available
@@ -89,13 +90,30 @@ function Simulator() {
         // Execute
         var pc = 0, lastPc = -1;
         var instruction = null, result = null, lastResult = {};
-        var decodeI, loadI, executeI, storeI;
-        execution = setInterval(function() {
-            instruction = sim.fetchStep((pc < instructions.length ? pc : -1), instructions);//pega 1 unica instrucao por vez da minha lista de instrucoes
-            sim.decode();
+        var decodeI, loadI, executeI, storeI; //var guarda a instrucao I na etapa n (nI)
+        execution = setInterval(function() {   
+            //instruction = sim.fetchStep((BTB.predict(pc) ? BTB.predict(pc) : pc < instructions.length ? pc : -1), instructions);//pega 1 unica instrucao por vez da minha lista de instrucoes
+			
+			var btbResult = decodeI ? sim.BTB.predict(decodeI.address) : undefined;
+			if(btbResult && decodeI.type === DATA_TYPES.CONTROL)
+			{
+				instruction = sim.fetchStep(btbResult, instructions)
+				instruction.btbResult = btbResult !== undefined ? true : false;
+				pc = btbResult;
+			}
+			else if(pc < instructions.length)
+			{
+				instruction = sim.fetchStep(pc, instructions);
+			}
+			else
+			{
+				instruction = sim.fetchStep(-1, instructions);
+			}
+			
+			sim.decode();
             sim.load(loadI);
             sim.store(storeI, lastResult);
-            result = sim.execute(executeI);
+            result = sim.execute(executeI);//result eh da instrucao que esta no execute e lastResult eh da instrucao q ta no store
             sim.end(execution, pc);
             console.log(executeI, result, sim.fillNoop);
             if (lastResult.pc != null && lastResult.pc != undefined) {
@@ -107,9 +125,13 @@ function Simulator() {
             else {
                 pc = ((pc < instructions.length) && (pc >= 0)) ? pc + 1 : -1;
             }
+			if(executeI && executeI.type === DATA_TYPES.CONTROL){
+				sim.BTB.update(executeI.address, executeI.params.branchTo, executeI.params.branchResult);
+				//console.log(executeI.address);
+			}
             lastResult = result;
             storeI = executeI;
-            executeI = decodeI;
+            executeI = loadI;
             loadI = decodeI;
             decodeI = instruction;
         }, 1000);
@@ -192,29 +214,41 @@ function Simulator() {
         var count = $(".load").length;
         var elem = $(".load:eq(0)");
         if (count) {
-            setTimeout(function() {
+			var isFlushing = sim.fillNoop === 0;
+			setTimeout(function() {
                 elem.removeClass("load");
                 elem.addClass("execute");
 
-                if (elem.hasClass("background-info")) {//background info eh "azul"
+                if (elem.hasClass("background-info") && isFlushing) {//background info eh "azul"
                     elem.removeClass("background-info");//retira o azul do bloquinho e coloca verde
                     elem.addClass("background-success");//nota: essas cores estao no .css              
                 }
             }, 100);
         }
-        if(instruction && instruction.type === DATA_TYPES.ARITHMETIC)
-        {
-            result.ula = instruction.executethis();
-        }
-        if (instruction && instruction.type === DATA_TYPES.CONTROL) {
-            if (instruction.name === "BRANCH IF ZERO") {
-                instruction.executethis();
-            }
-            if (instruction.params.branchResult) {
-                result.pc = instruction.getTargetAddr();
-                this.flush(3);
-            }
-        }
+		if(isFlushing)
+		{
+			if(instruction && instruction.type === DATA_TYPES.ARITHMETIC)
+			{
+				result.ula = instruction.executethis();
+			}
+			if (instruction && instruction.type === DATA_TYPES.CONTROL) {
+				if (instruction.name === "BRANCH IF ZERO") {
+					instruction.executethis();
+				}
+				console.log(instruction.params.branchResult, instruction.btbResult);
+				if (instruction.params.branchResult !== instruction.btbResult) {
+					this.flush(3);
+					if(instruction.params.branchResult)
+					{
+						result.pc = instruction.getTargetAddr();
+					}
+					else
+					{
+						result.pc = instruction.address + 1;
+					}
+				}
+			}	
+		}
 
         return result;
     }
@@ -228,7 +262,8 @@ function Simulator() {
                 elem.addClass("store");
             }, 100);
         }
-        if(instruction && instruction.type === DATA_TYPES.ARITHMETIC)
+		
+        if(result.ula != undefined && instruction && instruction.type === DATA_TYPES.ARITHMETIC)
         {
             instruction.params.op1.set(result.ula);
         }

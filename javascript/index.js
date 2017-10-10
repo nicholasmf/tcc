@@ -27,11 +27,7 @@ function setInstructionset() {
             iSet.LOAD(),
             iSet.ADD(T1, 3),
             iSet.LOAD(),
-            iSet.ADD(T1, T0),
-            iSet.ADD(T1, 4),
-            iSet.BRANCH_FALSE(),
-            iSet.ADD(T1, T0),
-            iSet.LOAD()
+            iSet.ADD(T1, T0)
         ];
     }
     else if (value === "test2") {
@@ -55,5 +51,13 @@ function setInstructionset() {
         iSet = null;
         code = null;
     }
+	
+	if(code)
+	{
+		code.map(function(item, i) {
+					item.address = i;
+				}
+		)
+	}
 }
 
