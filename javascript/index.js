@@ -25,12 +25,12 @@ function setInstructionset() {
             iSet.ADD(T0, 1),
             iSet.BRANCH_IF_ZERO(T0, 1),
             iSet.LOAD(),
-            iSet.ADD(),
+            iSet.ADD(T1, 3),
             iSet.LOAD(),
-            iSet.ADD(),
-            iSet.ADD(),
+            iSet.ADD(T1, T0),
+            iSet.ADD(T1, 4),
             iSet.BRANCH_FALSE(),
-            iSet.ADD(),
+            iSet.ADD(T1, T0),
             iSet.LOAD()
         ];
     }
@@ -57,6 +57,3 @@ function setInstructionset() {
     }
 }
 
-TestInstructionSet.ADD(T0, 2).executethis();
-TestInstructionSet.ADD(T1, 6).executethis();
-TestInstructionSet.ADD(T0, T1).executethis();

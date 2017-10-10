@@ -88,22 +88,30 @@ function Simulator() {
 
         // Execute
         var pc = 0, lastPc = -1;
+        var instruction = null, result = null, lastResult = {};
+        var decodeI, loadI, executeI, storeI;
         execution = setInterval(function() {
-            var instruction = sim.fetchStep((pc < instructions.length ? pc : -1), instructions);
+            instruction = sim.fetchStep((pc < instructions.length ? pc : -1), instructions);//pega 1 unica instrucao por vez da minha lista de instrucoes
             sim.decode();
-            sim.load(instruction);
-            var result = sim.execute(instruction);
-            sim.store(instruction, result);
+            sim.load(loadI);
+            sim.store(storeI, lastResult);
+            result = sim.execute(executeI);
             sim.end(execution, pc);
-            if (result.pc != null && result.pc != undefined) {
-                pc = result.pc;
+            console.log(executeI, result, sim.fillNoop);
+            if (lastResult.pc != null && lastResult.pc != undefined) {
+                pc = lastResult.pc;
             }
             else if (sim.fillNoop > 0) {
                 sim.fillNoop--;
             }
             else {
-                pc++;
+                pc = ((pc < instructions.length) && (pc >= 0)) ? pc + 1 : -1;
             }
+            lastResult = result;
+            storeI = executeI;
+            executeI = decodeI;
+            loadI = decodeI;
+            decodeI = instruction;
         }, 1000);
     }
 
@@ -112,7 +120,7 @@ function Simulator() {
     }
 
     /*************** Fetch *********************/
-    this.fetchStep = function(pc, instructions) {
+    this.fetchStep = function(pc, instructions) {//funcao q desenha as caixinhas a cada iteracao (1s)
         var pipeline = $(".pipeline");
         if (this.fillNoop > 0) {
             var instructionElem = $("<div class='pipeline-item background-danger fetch'>NoOp</div>");
@@ -126,13 +134,13 @@ function Simulator() {
             var instruction = sim.instructions[pc];
             var instructionList = $("#instructions");
             var instructionElem = $("<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>");
-
+                                    //<div class='formato cor posicao'></div>
             //var elem = instructionList.children(":eq(0)");
             //elem.addClass("out");
             setTimeout(function() {
                 //elem.detach();
                 pipeline.append(instructionElem);
-            }, 100);
+            }, 100);//talvez nao precise de delay
 
             if (instruction.name === "SET") {
                 var source = instruction.params.source;
@@ -148,7 +156,7 @@ function Simulator() {
                 }
             }
 
-            return instructions[pc];
+            return instructions[pc];//retorna a instrucao na posicao pc
         }
         else { 
             return null;
@@ -156,13 +164,13 @@ function Simulator() {
     }
 
     /***************** Decode *********************/
-    this.decode = function() {
+    this.decode = function() {//so parte grafica, por enquanto?
         var count = $(".fetch").length;
         var instruction = $(".fetch:eq(0)");
         if (count) {
             setTimeout(function() {
-                instruction.removeClass("fetch");
-                instruction.addClass("decode");
+                instruction.removeClass("fetch");//muda as caracteristicas do html (abaixo) pra passar cada bloquinho para a proxima etapa
+                instruction.addClass("decode");//"<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>"
             }, 100)
         }
     }
@@ -172,7 +180,7 @@ function Simulator() {
         var instruction = $(".decode:eq(0)");
         if (count) {
             setTimeout(function() {
-                instruction.removeClass("decode");
+                instruction.removeClass("decode");//muda as caracteristicas do html pra passar cada bloquinho para a proxima etapa(idem ao anterior)
                 instruction.addClass("load");
             }, 100);
         }
@@ -188,9 +196,9 @@ function Simulator() {
                 elem.removeClass("load");
                 elem.addClass("execute");
 
-                if (elem.hasClass("background-info")) {
-                    elem.removeClass("background-info");
-                    elem.addClass("background-success");                    
+                if (elem.hasClass("background-info")) {//background info eh "azul"
+                    elem.removeClass("background-info");//retira o azul do bloquinho e coloca verde
+                    elem.addClass("background-success");//nota: essas cores estao no .css              
                 }
             }, 100);
         }

@@ -9,7 +9,7 @@
     transform: scale(0, 1);
 }
 
-.pipeline-item {
+.pipeline-item { /*eh o quadradinho, caracteristicas do formato, sombra (td menos cor e posicao; animacao... vai td aqui) */
     top: 52px;
     width: 42px;
     height: 42px;
@@ -36,7 +36,7 @@
 }
 
 .pipeline-item.fetch {
-    left: 10%;
+    left: 10%; /*so marca a posicao, basicamente */
 }
 
 .pipeline-item.decode {

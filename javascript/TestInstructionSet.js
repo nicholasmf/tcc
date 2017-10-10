@@ -40,8 +40,11 @@ TestInstructionSet.BRANCH_IF_ZERO = function (source, dest)
         { 
             this.params.branchResult = true;
         } 
-        else
+        else {
             this.params.branchResult = false;
+        }
+
+        //console.log(this.params.source.get());
     } );
 };
 // TestInstructionSet.DIVIDE = function ()
