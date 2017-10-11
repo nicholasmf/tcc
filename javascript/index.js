@@ -13,6 +13,18 @@ function start() {
     simulator.run(iSet, code);
 }
 
+function resume() {
+    simulator.resume();
+}
+
+function stop() {
+    simulator.stop();
+}
+
+function nextStep() {
+    simulator.nextStep();
+}
+
 function setInstructionset() {
     var select = $("#selectInstructionset");
     var value = select.val();
@@ -66,5 +78,10 @@ function setInstructionset() {
 				}
 		)
 	}
+}
+
+function setTimeInterval() {
+    var elem = $("#selectTimeInterval").val();
+    simulator.setTimeInterval(elem);
 }
 

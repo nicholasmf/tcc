@@ -70,6 +70,26 @@ function Simulator() {
 		}
     }
 
+    this.resume = function() {
+        if (sim.timeInterval) {
+            execution = setInterval(sim.cicle , sim.timeInterval * 1000);
+        }
+    }
+
+    this.stop = function() {
+        if (execution) {
+            clearInterval(execution);
+        }
+    }
+
+    this.nextStep = function() {
+        sim.cicle();
+    }
+
+    this.setTimeInterval = function(value) {
+        sim.timeInterval = value;
+    }
+
     this.run = function(instructionSet, instructions) {
         var p1 = new P1();
         console.log(p1.name);
@@ -91,7 +111,8 @@ function Simulator() {
         var pc = 0, lastPc = -1;
         var instruction = null, result = null, lastResult = {};
         var decodeI, loadI, executeI, storeI; //var guarda a instrucao I na etapa n (nI)
-        execution = setInterval(function() {   
+
+        sim.cicle = function() {   
             //instruction = sim.fetchStep((BTB.predict(pc) ? BTB.predict(pc) : pc < instructions.length ? pc : -1), instructions);//pega 1 unica instrucao por vez da minha lista de instrucoes
 			
 			var btbResult = decodeI ? sim.BTB.predict(decodeI.address) : undefined;
@@ -140,7 +161,11 @@ function Simulator() {
             executeI = loadI;
             loadI = decodeI;
             decodeI = instruction;
-        }, 1000);
+        };
+
+        if (sim.timeInterval) {
+            execution = setInterval(sim.cicle , sim.timeInterval * 1000);
+        }
     }
 
     this.flush = function(cicles) {
@@ -184,7 +209,7 @@ function Simulator() {
         if (count) {
             setTimeout(function() {
                 instruction.removeClass("fetch");//muda as caracteristicas do html (abaixo) pra passar cada bloquinho para a proxima etapa
-                instruction.addClass("decode");//"<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>"
+                instruction.addClass("decode");//"<div class='pipeline-item backgro     und-info fetch'>" + instruction.name + "</div>"
             }, 100)
         }
     }
@@ -297,7 +322,7 @@ function Simulator() {
                 instructionList.append(instructionElem);
             }, 100);
         }
-        else if (pc === -1) {
+        else if (pc === -1 && interval) {
             clearInterval(interval);
         }
     }

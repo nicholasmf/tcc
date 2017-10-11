@@ -51,14 +51,26 @@
     <body>
         <nav class="navbar">
             <h4>Opções</h4>
-            <form class="form-inline">
+            <form class="form-inline margin-bottom-20">
                 <select class="form-control mr-sm-2" id="selectInstructionset" onchange="setInstructionset()">
-                    <option value="" selected>-- Selectione uma opção --</option>
+                    <option value="">-- Selectione um instruction set --</option>
                     <option value="test">Test Instructionset</option>
                     <option value="test2">Test2 Instructionset</option>                
                 </select>
 
+                <select class="form-control mr-sm-2" id="selectTimeInterval" onchange="setTimeInterval()">
+                    <option value="">-- Selecione um intervalo de execução --</option>
+                    <option value="1">1 segundo</option>
+                    <option value="2">2 segundos</option>
+                    <option value="5">5 segundos</option>
+                </select>
+
                 <input class="btn btn-primary my-sm-2" type="button" value="Start" onclick="start()"/>
+            </form>
+            <form class="form-inline">
+                <input class="btn btn-primary" type="button" value="Play" onclick="resume()"/>
+                <input class="btn btn-primary" type="button" value="Stop" onclick="stop()"/>
+                <input class="btn btn-primary" type="button" value="Next" onclick="nextStep()"/>
             </form>
         </nav>
         <div class="container-fluid">

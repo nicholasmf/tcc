@@ -9,6 +9,10 @@
     transform: scale(0, 1);
 }
 
+.margin-bottom-20 {
+    margin-bottom: 20px;
+}
+
 .pipeline-item { /*eh o quadradinho, caracteristicas do formato, sombra (td menos cor e posicao; animacao... vai td aqui) */
     top: 52px;
     width: 42px;
