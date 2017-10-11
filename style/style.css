@@ -1,3 +1,9 @@
+#instructions, #finalList {
+    transition: 0.2s ease-in-out;
+    max-height: 124px;
+    overflow-y: auto;
+}
+
 #instructions li {
     opacity: 1;
     transition-duration: 2s;
@@ -7,6 +13,11 @@
 #instructions li.out {
     left: 130%;
     transform: scale(0, 1);
+}
+
+#instructions li.active {
+    transform: scale(1.2);
+    font-weight: bold;
 }
 
 .margin-bottom-20 {

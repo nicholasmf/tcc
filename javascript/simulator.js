@@ -175,6 +175,8 @@ function Simulator() {
     /*************** Fetch *********************/
     this.fetchStep = function(pc, instructions) {//funcao q desenha as caixinhas a cada iteracao (1s)
         var pipeline = $(".pipeline");
+        var instructionList = $("#instructions");
+        instructionList.children('.active').removeClass('active');
         if (this.fillNoop > 0) {
             var instructionElem = $("<div class='pipeline-item background-danger fetch'>NoOp</div>");
             setTimeout(function() {
@@ -185,11 +187,15 @@ function Simulator() {
         }
         else if (pc > -1) {
             var instruction = sim.instructions[pc];
-            var instructionList = $("#instructions");
             var instructionElem = $("<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>");
                                     //<div class='formato cor posicao'></div>
             //var elem = instructionList.children(":eq(0)");
             //elem.addClass("out");
+            var elem = instructionList.children(`:eq(${pc})`);
+            elem.addClass('active');
+            $("#instructions").animate({
+                scrollTop: 42*(pc-1) - 4
+            }, 200);
             setTimeout(function() {
                 //elem.detach();
                 pipeline.append(instructionElem);
@@ -320,6 +326,9 @@ function Simulator() {
             setTimeout(function() {
                 instruction.detach();
                 instructionList.append(instructionElem);
+                instructionList.animate({
+                    scrollTop: instructionList[0].scrollHeight
+                }, 200);
             }, 100);
         }
         else if (pc === -1 && interval) {
