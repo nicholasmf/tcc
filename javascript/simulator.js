@@ -32,6 +32,11 @@ function Register(name, index) {
         let panel = elem.children()[0];
         $(panel).removeClass('panel-default');
         $(panel).addClass('panel-info');
+
+        $("#registersContainer").animate({
+            scrollTop: (113 * Math.floor(register.index / 12))
+        }, 200);
+
         setTimeout(function() {
             $(panel).removeClass('panel-info');
             $(panel).addClass('panel-default');                
@@ -130,6 +135,8 @@ function Simulator() {
         });
         
         sim.renderRegistersBank();
+        sim.BTB.render($("#cacheContainer"));
+        
         // Execute
        
 
@@ -153,7 +160,6 @@ function Simulator() {
                 sim.fillNoop--;
 			}
 			console.log("pc: " + pc + " LR: " + sim.fillNoop);
-            sim.BTB.render($("#cacheContainer"));            
         };
 		if (sim.timeInterval) {
 			execution = setInterval(sim.cicle , sim.timeInterval * 1000);

@@ -20,15 +20,15 @@ function BTB() {
             let history = entry.history;
             if (taken) {
                 if (history === 0) {
-                    entry.history = 3;
+                    this.cache.update(address, {history: 3});
                 }
                 else if (history < 3) {
-                    entry.history++;
+                    this.cache.update(address, {history: history + 1});
                 }
             }
             else {
                 if (history > 0) {
-                    entry.history--;
+                    this.cache.update(address, {history: history - 1});
                 }
             }
         }

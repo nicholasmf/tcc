@@ -1,3 +1,4 @@
+/************************** Lists *******************/
 #instructions, #finalList {
     transition: 0.2s ease-in-out;
     max-height: 124px;
@@ -21,17 +22,15 @@
     font-weight: bold;
 }
 
-.no-padding {
-    padding: 0;
+/************************* Pipeline **************************/
+.pipeline {
+    height: 100px;
+    position: absolute;
+    width: 100%;
 }
 
-.no-padding-h { 
-    padding-left: 0;
-    padding-right: 0;
-}
-
-.margin-bottom-20 {
-    margin-bottom: 20px;
+.pipeline:nth-child(2) {
+    top: 100px;
 }
 
 .pipeline-item { /*eh o quadradinho, caracteristicas do formato, sombra (td menos cor e posicao; animacao... vai td aqui) */
@@ -99,6 +98,22 @@
     }
 }
 
+/*************************** Registers bank ***************/
+#registersContainer {
+    height: 180px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/************************ BTB ****************************/
+#cacheContainer {
+    height: 180px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-left: 25px;
+}
+
+/******************** General ***************/
 .background-info {
     background-color: #d9edf7;
 }
@@ -110,6 +125,19 @@
 .background-danger {
     background-color: #f2dede;
 }
+.no-padding {
+    padding: 0;
+}
+
+.no-padding-h { 
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.margin-bottom-20 {
+    margin-bottom: 20px;
+}
+
 
 /************** Overwrite ****************/
 .panel-heading {

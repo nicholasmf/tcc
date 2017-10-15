@@ -2,6 +2,7 @@
  * Params:  - size: cache size
  *          - ways: cache ways
  * Methods: - insert
+ *          - update
  *          - search
  *          - render
  ****************************************************************/
@@ -37,6 +38,44 @@
         else {
             block.push(newNode);
         }
+
+        cache.update(address);
+    }
+
+    // Updates element on address and renders new value
+    this.update = function(address, value) {
+        let node = cache.search(address);
+        let set = address % this.sets;
+        
+        if (!node) { return undefined; }
+        if (value) {
+            for (var property in value) {
+                node[property] = value[property];
+            }
+        }
+
+        if (cache.container) {
+            let blockElem = cache.container.children().eq(set);
+            let block = cache.cacheArray[set];
+
+            var index;
+            block.map((item, i) => {
+                if (item === node) { index = i; }
+            });
+
+            let children = blockElem.children();
+            children.eq(index * 4 + 1).text(node.tag);
+            children.eq(index * 4 + 2).text(node.value);
+            children.eq(index * 4 + 3).text(node.history);
+            
+            cache.container.animate({
+                scrollTop: 80 * (set - 1) + 50
+            }, 200);
+            blockElem.addClass('background-info');
+            setTimeout(() => {
+                blockElem.removeClass('background-info');
+            }, 800);
+        }
     }
 
     // Return undefined if not found or the value
@@ -55,47 +94,24 @@
 
     // Expects a HTML element to render into
     this.render = function(container) {
-        var cacheElement = $("<div></div>");
         var row = $("<div class='row'></div>");
         var col = $("<div class='col-xs-3 no-padding'></div>");
 
+        cache.container = container;
         container.empty();
-        var firstRow = row.clone();
-        var labels = ["Set", "Tag", "Value", "Status"];
-        cacheElement.append(firstRow);
-        for (let i = 0; i < labels.length; i++) {
-            var colLabel = col.clone().text(labels[i]);
-            firstRow.append(colLabel);
-        }
-
         for (let i = 0; i < cache.sets; i++) {
             let block = cache.cacheArray[i];
             let newRow = row.clone();
 
-            let tagText = [];
-            let valueText = [];
-            let statusText = [];
-
             for (let j = 0; j < cache.ways; j++) {
                 let node = block ? block[j] : undefined;
-                tagText.push(node ? node.tag : "0");
-                valueText.push(node ? node.value : "0");
-                statusText.push(node ? node.history : "0");
+                newRow.append(col.clone().text(j === 0 ? i : ""));
+                newRow.append(col.clone().text(node ? node.tag : "0"));
+                newRow.append(col.clone().text(node ? node.value : "0"));
+                newRow.append(col.clone().text(node ? node.history : "0"));
             }
 
-            let setCol = col.clone().text(i);
-            let tagCol = col.clone().html(tagText.join("<br>"));
-            let valueCol = col.clone().html(valueText.join("<br>"));
-            let statusCol = col.clone().html(statusText.join("<br>"));
-
-            newRow.append(setCol);
-            newRow.append(tagCol);
-            newRow.append(valueCol);
-            newRow.append(statusCol);
-
-            cacheElement.append(newRow);
+            container.append(newRow);
         }
-
-        container.append(cacheElement);
     }
 }

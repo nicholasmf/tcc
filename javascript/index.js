@@ -10,6 +10,8 @@ const T2 = simulator.registersArray[2];
 const T3 = simulator.registersArray[3];
 const T4 = simulator.registersArray[4];
 
+const V0 = simulator.registersArray[50];
+
 function start() {
 	var architecture = new P5Pipe();
 	simulator.clear();
@@ -45,7 +47,8 @@ function setInstructionset() {
             iSet.ADD(T1, 1),
 			iSet.BRANCH_IF_ZERO(T1, 9),
 			iSet.BRANCH_IF_ZERO(T0, 6),
-			iSet.SET(T0, 1),
+            iSet.SET(T0, 1),
+            iSet.ADD(V0, 4),
 			iSet.LOAD(),
 			iSet.LOAD(),
 			iSet.LOAD(),
