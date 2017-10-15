@@ -14,14 +14,28 @@ function isObject(elem) {
     return (elem !== null && typeof elem === 'object');
 }
 
-function Register() {
+function Register(name, index) {
     const register = this;
     this.value = 0;
+    this.name = name;
+    this.index = index;
     this.get = function() {
         return register.value;
     }
     this.set = function(value) {
         register.value = value;
+
+        /****** Update render *****/
+        const container = $("#registersContainer .row");
+        let elem = container.children().eq(register.index);
+        $(elem).find('.panel-body').text(value);
+        let panel = elem.children()[0];
+        $(panel).removeClass('panel-default');
+        $(panel).addClass('panel-info');
+        setTimeout(function() {
+            $(panel).removeClass('panel-info');
+            $(panel).addClass('panel-default');                
+        }, 800);
     }
 }
 
@@ -34,6 +48,13 @@ function Simulator() {
 
     this.registersArray = [];
     this.tempRegistersArray = [];
+    for (let i = 0; i < this.registers; i++) {
+        var name = "";
+        if (i < 16) {
+            name = `T${i}`;
+        }
+        this.registersArray[i] = new Register(name, i);
+    }
     for (let i = 0; i < this.tempRegisters; i++) {
         this.tempRegistersArray[i] = new Register();
     }
@@ -45,15 +66,15 @@ function Simulator() {
      * registers: number of registers available
      * tempRegisters: number of temporary registers available
      */
-    this.init = function(params) {
-        this.registers = params.registers || 64;
-        this.tempRegisters = params.registers || 256;
+    // this.init = function(params) {
+    //     this.registers = params.registers || 64;
+    //     this.tempRegisters = params.registers || 256;
 
-        this.registersArray = new Array(this.registers);
-        this.tempRegistersArray = new Array(this.tempRegisters);
+    //     this.registersArray = new Array(this.registers);
+    //     this.tempRegistersArray = new Array(this.tempRegisters);
 
-        this.renderRegistersBank();
-    }
+    //     this.renderRegistersBank();
+    // }
 
     /******************** Clear lists, pipeline and memory *****************/
     this.clear = function() {
@@ -107,28 +128,53 @@ function Simulator() {
             newItem.className = 'list-group-item';
             instructionsList.appendChild(newItem);
         });
-
+        
+        sim.renderRegistersBank();
         // Execute
        
 
         sim.cicle = function() {   
 			
 			var cycleReturns = architecture.p5cycle(sim.BTB, instructions, pc, execution, sim.fillNoop);
-			sim.fillNoop = cycleReturns[1];
+            sim.fillNoop = cycleReturns[1];
+            if (cycleReturns[2]) {
+                pc = cycleReturns[2];
+            }
 			if (cycleReturns[0].pc != null && cycleReturns[0].pc != undefined) {
 				pc = cycleReturns[0].pc;
 			}
-			else if (sim.fillNoop > 0) {
-				sim.fillNoop--;
-			}
+			// else if (sim.fillNoop > 0) {
+			// 	sim.fillNoop--;
+			// }
 			else {
 				pc = ((pc < instructions.length) && (pc >= 0)) ? pc + 1 : -1;
 			}
+			if (sim.fillNoop > 0) {
+                sim.fillNoop--;
+			}
 			console.log("pc: " + pc + " LR: " + sim.fillNoop);
-			
+            sim.BTB.render($("#cacheContainer"));            
         };
 		if (sim.timeInterval) {
 			execution = setInterval(sim.cicle , sim.timeInterval * 1000);
         }
+    }
+
+    this.renderRegistersBank = function() {
+        const container = $("#registersContainer");
+        const row = $("<div class='row'></div>");
+        const col = $("<div class='col-xs-1'></div>");
+    
+        container.empty();
+
+        for (let i = 0; i < sim.registers; i++) {
+            let register = sim.registersArray[i];
+            let newCol = col.clone();
+            let name = register.name ? ("$" + register.name) : i;
+            let panel = $(`<div class='panel panel-default'><div class='panel-heading'>${name}</div><div class='panel-body'>${register.get()}</div></div>`)
+            newCol.append(panel);
+            row.append(newCol);
+        }
+        container.append(row);
     }
 }

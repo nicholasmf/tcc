@@ -52,11 +52,11 @@ function P5Pipe() {
 		}
 		else {
 			pc = ((pc < instructions.length) && (pc >= 0)) ? pc + 1 : -1;
-		}
+		}*/
 		if(executeI && executeI.type === DATA_TYPES.CONTROL){
 			pipeSim.BTB.update(executeI.address, executeI.params.branchTo, executeI.params.branchResult);
 			//console.log(executeI.address);
-		}*/
+		}
 		
 		var lastResultReturn = lastResult;
 		lastResult = result;
@@ -65,7 +65,7 @@ function P5Pipe() {
 		loadI = decodeI;
 		decodeI = instruction;
 		
-		return [lastResultReturn, pipeSim.fillNoop];
+		return [result, pipeSim.fillNoop, btbResult];
 	}
 	
 	/*************** Fetch *********************/
@@ -75,15 +75,16 @@ function P5Pipe() {
         //var pipeline = $('<div class="container pipeline">\n</div>');//$(".pipeline");	
         var instructionList = $("#instructions");
         instructionList.children('.active').removeClass('active');
-        if (pipeSim.fillNoop > 0) {
-            var instructionElem = $("<div class='pipeline-item background-danger fetch'>NoOp</div>");
-            setTimeout(function() {
-                //elem.detach();
-                midCol.append(instructionElem);
-            }, 100);
-            return new Instruction("NoOp");
-        }
-        else if (pc > -1) {
+        // if (pipeSim.fillNoop > 0) {
+        //     var instructionElem = $("<div class='pipeline-item background-danger fetch'>NoOp</div>");
+        //     setTimeout(function() {
+        //         //elem.detach();
+        //         pipeline.append(instructionElem);
+        //     }, 100);
+        //     return new Instruction("NoOp");
+        // }
+        // else 
+        if (pc > -1) {
             var instruction = instructions[pc];
             var instructionElem = $("<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>");
                                     //<div class='formato cor posicao'></div>
@@ -138,8 +139,8 @@ function P5Pipe() {
 
         containerPipeline.child = $(".load").length;
         var elem = $(".load:eq(0)");
+        var isFlushing = pipeSim.fillNoop === 0;
         if (containerPipeline.child) {
-			var isFlushing = pipeSim.fillNoop === 0;
 			setTimeout(function() {
                 elem.removeClass("load");
                 elem.addClass("execute");
@@ -152,8 +153,7 @@ function P5Pipe() {
         }
 		if(isFlushing)
 		{
-			
-			if (instruction.name === "SET") {
+			if (instruction && instruction.name === "SET") {
                 var source = instruction.params.source;
                 var dest = instruction.params.dest;
     
@@ -240,7 +240,7 @@ function P5Pipe() {
     }
 	
 	this.flush = function(cicles) {
-		pipeSim.fillNoop = cicles;
-		//console.log("psfn: " + pipeSim.fillNoop);
+		pipeSim.fillNoop = cicles + 1;
+		console.log("psfn: " + pipeSim.fillNoop);
     }
 }
