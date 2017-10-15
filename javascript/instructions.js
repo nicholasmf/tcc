@@ -9,11 +9,12 @@ function InstructionSet() {
 	
 }
 
-function Instruction (name, type, MicroInstruction, params, executethis) {
+function Instruction (name, type, MicroInstruction, params, executableInV, executethis) {
     this.name = name;
     this.type = type;
     this.MicroInstruction = MicroInstruction;
     this.params = params;
+	this.executableInV = executableInV;
     this.executethis = executethis;
     if (params) {
         this.branchResult = params.branchResult;//veracidade do jump
