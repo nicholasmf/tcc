@@ -1,6 +1,6 @@
 // Branch Target Buffer
 function BTB() {
-    this.cache = new a4waycache();
+    this.cache = new associativeCache(256, 4);
 
     // target address if predict to be taken, undefined otherwise
     this.predict = function(address) {
@@ -36,53 +36,13 @@ function BTB() {
             this.cache.insert(address, target, taken ? 3 : 0);
         }
     }
-};
 
-function cacheNode(tag, value, history) {
-    this.tag = tag || 0;
-    this.value = value || 0;
-    this.history = history || 0;
-}
-
-// 4 way associative cache
-function a4waycache() {
-    this.size = 256;
-    this.ways = 4;
-    this.sets = this.size/this.ways;
-    this.cacheArray = [];
-
-    this.insert = function(address, value, counter) {
-        let set = address % this.sets;
-        let tag = Math.floor(address / this.sets);
-        let block = this.cacheArray[set];
-        let newNode = new cacheNode(tag, value, counter);
-        
-        if (!block) {
-            this.cacheArray[set] = [newNode];
-        }
-        else if (block.length === this.ways) { 
-            let rand = Math.floor(Math.random() * 4);
-            block[rand] = newNode;
-        }
-        else {
-            block.push(newNode);
-        }
-    }
-
-    // Return undefined if not found or the value
-    this.search = function(address) {
-        let set = address % this.sets;
-        let tag = Math.floor(address / this.sets);
-
-        let block = this.cacheArray[set];
-
-        if (!block) { return undefined; };
-        if (block.length === 0) { return undefined; }
-        return block.find(node => {
-            return node.tag === tag;
-        });
+    // Render BTB
+    this.render = function(container) {
+        this.cache.render(container);
     }
 };
+
 
 /******** testing BTB *********/
 // let predictor = new BTB();

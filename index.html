@@ -27,6 +27,9 @@
         <!-- Database handler -->
         <script type="text/javascript" src="./javascript/firebase_handler.js"></script>
 
+        <!-- Caches -->
+        <script type="text/javascript" src="./javascript/caches/associative-cache.js"></script>
+
         <!-- Processors -->
         <script type="text/javascript" src="./javascript/processors/p1/pipeline.js"></script>
 
@@ -92,10 +95,12 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-8">
-
+                    <h2>Registers Bank</h2>
+                    <div id="registersContainer"></div>
                 </div>
                 <div class="col-md-4">
-                    
+                    <h2>BTB Cache</h2>
+                    <div id="cacheContainer"></div>
                 </div>
             </div>
         </div>
