@@ -41,7 +41,7 @@
     animation-duration: .2s;
 }
 
-@keyframes pipeline-item-in {
+@keyframes pipeline-item-in {/*animacao dos bloquinhos q entram no pipe (engordam e emagrecem) */
     from {
         transform: scale(2, 1);
     }
