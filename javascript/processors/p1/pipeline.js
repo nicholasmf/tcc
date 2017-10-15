@@ -7,6 +7,7 @@ function P5Pipe() {
 	var instruction = null, result = null, lastResult = {};
     var decodeI, loadI, executeI, storeI; //var guarda a instrucao I na etapa n (nI)
 	var containerPipeline = $('<div class="container pipeline"></div>');
+	$("#pipelineDivGoesBeneath").append(containerPipeline);
 	
 	this.p5cycle = function(BTB, instructions, pc, execution, fillNoop) {
 
@@ -70,8 +71,8 @@ function P5Pipe() {
 	
 	/*************** Fetch *********************/
     this.fetchStep = function(pc, instructions) {//funcao q desenha as caixinhas a cada iteracao (1s)
-		var midCol = $("#pipelineDivGoesBeneath");
-		midCol.append(containerPipeline);
+		//var midCol = $("#pipelineDivGoesBeneath");
+		//midCol.append(containerPipeline);
         //var pipeline = $('<div class="container pipeline">\n</div>');//$(".pipeline");	
         var instructionList = $("#instructions");
         instructionList.children('.active').removeClass('active');
@@ -97,7 +98,7 @@ function P5Pipe() {
             }, 200);
             setTimeout(function() {
                 //elem.detach();
-                midCol.append(instructionElem);
+                containerPipeline.append(instructionElem);
             }, 100);//talvez nao precise de delay
 
             return instructions[pc];//retorna a instrucao na posicao pc
@@ -109,24 +110,37 @@ function P5Pipe() {
 
     /***************** Decode *********************/
     this.decode = function() {//so parte grafica, por enquanto?
-        containerPipeline.child = $(".fetch").length;
-        var instruction = $(".fetch:eq(0)");
-        if (containerPipeline.child) {
+        var count =  containerPipeline.children(".fetch").length;
+        var instruction = containerPipeline.children(".fetch:eq(0)");
+        if (count) {
             setTimeout(function() {
                 instruction.removeClass("fetch");//muda as caracteristicas do html (abaixo) pra passar cada bloquinho para a proxima etapa
                 instruction.addClass("decode");//"<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>"
             }, 100)
         }
-		//if(decodeI2.executableInV) {
-			//useVPipe = pairingCheck(decodeI1, decodeI2);
-		//}
+				
+				
+		/*
+		preciso pegar a posicao pc de cada instrucao
+		if(decodeI1.pc < decodeI2.pc ) {  //instrucoes estao em ordem no buffer i.e. [pc, pc+1]
+			if(decodeI2.executableInV) {
+			useVPipe = pairingCheck(decodeI1, decodeI2);
+			}
+		}
+		else {//instrucoes estao em ordem reversa no buffer i.e. [pc, pc-1] (acontece se instrucoes nao sao pareadas e o pipe V fica vazio)
+			if(decodeI1.executableInV) {
+			useVPipe = pairingCheck(decodeI2, decodeI1);
+			}
+		}
+		*/
+		
 		
     }
 
     this.load = function() {
-        containerPipeline.child = $(".decode").length;
-        var instruction = $(".decode:eq(0)");
-        if (containerPipeline.child) {
+        var count = containerPipeline.children(".decode").length;
+        var instruction = containerPipeline.children(".decode:eq(0)");
+        if (count) {
             setTimeout(function() {
                 instruction.removeClass("decode");//muda as caracteristicas do html pra passar cada bloquinho para a proxima etapa(idem ao anterior)
                 instruction.addClass("load");
@@ -137,10 +151,10 @@ function P5Pipe() {
     this.execute = function(instruction) {
         var result = {};
 
-        containerPipeline.child = $(".load").length;
-        var elem = $(".load:eq(0)");
+        var count = containerPipeline.children(".load").length;
+        var elem = containerPipeline.children(".load:eq(0)");
         var isFlushing = pipeSim.fillNoop === 0;
-        if (containerPipeline.child) {
+        if (count) {
 			setTimeout(function() {
                 elem.removeClass("load");
                 elem.addClass("execute");
@@ -195,9 +209,9 @@ function P5Pipe() {
     }
 
     this.store = function(instruction, result) {
-        containerPipeline.child = $(".execute").length;
-        var elem = $(".execute:eq(0)");
-        if (containerPipeline.child) {
+        var count =  containerPipeline.children(".execute").length;
+        var elem = containerPipeline.children(".execute:eq(0)");
+        if (count) {
             setTimeout(function() {
                 elem.removeClass("execute");
                 elem.addClass("store");
@@ -211,8 +225,8 @@ function P5Pipe() {
     }
 
     this.end = function(interval, pc) {
-        containerPipeline.child = $(".store").length;
-        var instruction = $(".store:eq(0)");
+        var count =  containerPipeline.children(".store").length;
+        var instruction = containerPipeline.children(".store:eq(0)");
         var pipeline = $(".pipeline");
         var instructionList = $("#finalList");
         var instructionElem = $("<li class='list-group-item'>" + instruction.text() + "</li>");
@@ -224,7 +238,7 @@ function P5Pipe() {
             instructionElem.addClass("list-group-item-danger");
         }
 
-        if (containerPipeline.child) {
+        if (count) {
             instruction.addClass("out");
             setTimeout(function() {
                 instruction.detach();

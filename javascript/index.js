@@ -3,8 +3,6 @@ var iSet;
 
 var code = [];
 
-var architecture = new P5Pipe();
-
 /**** Constants used ******/
 const T0 = simulator.registersArray[0];
 const T1 = simulator.registersArray[1];
@@ -13,6 +11,7 @@ const T3 = simulator.registersArray[3];
 const T4 = simulator.registersArray[4];
 
 function start() {
+	var architecture = new P5Pipe();
 	simulator.clear();
     simulator.run(iSet, code, architecture);
 }
