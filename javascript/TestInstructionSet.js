@@ -20,10 +20,29 @@ TestInstructionSet.ADD = function (dest, source)
 
     }); 
 };
-TestInstructionSet.LOAD = function (source, dest) 
+TestInstructionSet.LOAD = function (dest, address) 
 { 
-    return new Instruction("LOAD", DATA_TYPES.DATA_TRANSFER, null, {source : source, dest : dest}, true);
+    return new Instruction("LOAD", DATA_TYPES.DATA_TRANSFER, null, {address: address, dest : dest}, true, function(memory) 
+    {
+        let value = memory.get(address);
+        dest.set(value);
+    });
 };
+TestInstructionSet.LOADI = function(dest, value) 
+{
+    return new Instruction("LOADI", DATA_TYPES.DATA_TRANSFER, null, {dest: dest, value: value}, true, function() 
+    {
+        dest.set(value);
+    });
+}
+TestInstructionSet.STORE = function(source, address)
+{
+    return new Instruction("SAVE", DATA_TYPES.DATA_TRANSFER, null, {address: address, source: source}, true, function(memory)
+    {
+        let value = getValue(source);
+        memory.set(address, value);
+    });
+}
 TestInstructionSet.BRANCH_TRUE = function (dest)
 {
     return new Instruction("BRANCH (true)", DATA_TYPES.CONTROL, null, { branchResult: true, branchTo: dest }, true);
@@ -51,6 +70,9 @@ TestInstructionSet.BRANCH_IF_ZERO = function (source, dest)
 // {
 //     return new Instruction("DIVISIBLE", DATA_TYPES.DIVISIBLE, [new MicroInstruction("ADD", DATA_TYPES.ARITHMETIC), new MicroInstruction("ADD", DATA_TYPES.ARITHMETIC)]);
 // }
-TestInstructionSet.SET =  function (register, value) { 
-    return new Instruction("SET", DATA_TYPES.DATA_TRANSFER, null, { source: value, dest: register }, true); 
-};
+// TestInstructionSet.SET =  function (register, value) { 
+//     return new Instruction("SET", null, null, { source: value, dest: register }, true); 
+// };
+TestInstructionSet.DUMMY = function() {
+    return new Instruction("DUMMY");
+}

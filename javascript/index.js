@@ -38,21 +38,20 @@ function setInstructionset() {
         iSet = TestInstructionSet;
 
         code = [
-            iSet.SET(T0, 0),
+            iSet.STORE(-4, 15),
+            iSet.LOADI(T0, 0),
             iSet.BRANCH_IF_ZERO(T0, 5),
-            iSet.LOAD(),
-            iSet.LOAD(),
-			iSet.LOAD(),
-			iSet.SET(T1, -4),
+            iSet.DUMMY(),
+            iSet.DUMMY(),
+			iSet.LOAD(T1, 15),
             iSet.ADD(T1, 1),
 			iSet.BRANCH_IF_ZERO(T1, 9),
 			iSet.BRANCH_IF_ZERO(T0, 6),
-            iSet.SET(T0, 1),
+            iSet.LOADI(T0, 1),
             iSet.ADD(V0, 4),
-			iSet.LOAD(),
-			iSet.LOAD(),
-			iSet.LOAD(),
-			
+			iSet.DUMMY(),
+			iSet.DUMMY(),
+			iSet.DUMMY(),
         ];
     }
     else if (value === "test2") {
@@ -109,30 +108,39 @@ function setTimeInterval() {
     
 // ];
 
-// // Returns if two instructions are true dependent (RaW)
-// function checkRaW(i1, i2) {
-//     if (i1.type === DATA_TYPES.ARITHMETIC && i2.type === DATA_TYPES.ARITHMETIC) {
-//         if (i2.params.dest.name && i1.params.dest.name === i2.params.dest.name) {
-//             return true;
-//         }
-//         if (i2.params.source.name && i1.params.source.name === i2.params.source.name) {
-//             return true;
-//         }
-//     }
-//     return false;
-// }
+// Returns if two instructions are true dependent (RaW)
+function checkRaW(i1, i2) {
+    if (i1.type === DATA_TYPES.ARITHMETIC && i2.type === DATA_TYPES.ARITHMETIC) {
+        if (i2.params.dest.name && i1.params.dest.name === i2.params.dest.name) {
+            return true;
+        }
+        if (i2.params.source.name && i1.params.dest.name === i2.params.source.name) {
+            return true;
+        }
+    }
+    return false;
+}
 
-// // Returns if two instructions has anti-dependence (WaR)
-// function checkWaR(i1, i2) {
-//     if (i1.type === DATA_TYPES.ARITHMETIC && i2.type === DATA_TYPES.ARITHMETIC) {
-//         if (i2.params.dest.name && i1.params.dest === i2.params.dest) {
-//             return true;
-//         }
-//         if (i2.params.source.name && i1.params.source.name === i2.params.source.name) {
-//             return true;
-//         }
-//     }
-// }
+// Returns if two instructions has anti-dependence (WaR)
+function checkWaR(i1, i2) {
+    if (i1.type === DATA_TYPES.ARITHMETIC && i2.type === DATA_TYPES.ARITHMETIC) {
+        if (i1.params.dest.name && i1.params.dest.name === i2.params.dest.name) {
+            return true;
+        }
+        if (i1.params.source.name && i1.params.source.name === i2.params.dest.name) {
+            return true;
+        }
+    }
+}
+
+// Returns if two instructions has (WaW)
+function checkWaW(i1, i2) {
+    if (i1.type === DATA_TYPES.ARITHMETIC && i2.type === DATA_TYPES.ARITHMETIC) {
+        if (i1.params.dest.name === i2.params.dest.name) {
+            return true;
+        }
+    }
+}
 
 // iSet = TestInstructionSet;
 // let i1 = iSet.ADD(T0, 1);
@@ -144,4 +152,6 @@ function setTimeInterval() {
 // res = checkRaW(i2, i3);
 // console.log(res);
 // res = checkRaW(i3, i4);
+// console.log(res);
+// res = checkWaR(i2, i1);
 // console.log(res);

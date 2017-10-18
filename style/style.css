@@ -98,11 +98,25 @@
     }
 }
 
+/************************ Data Memory *********************/
+#dataMemory {
+    height: 180px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 /*************************** Registers bank ***************/
 #registersContainer {
     height: 180px;
     overflow-y: auto;
     overflow-x: hidden;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+#registersContainer .col-xs-1 {
+    padding-left: 3px;
+    padding-right: 3px;
 }
 
 /************************ BTB ****************************/

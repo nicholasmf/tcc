@@ -7,10 +7,15 @@
  *          - render
  ****************************************************************/
 /*********************** Cache node *****************************/
- function cacheNode(tag, value, history) {
+function cacheNode(tag, value, history) {
+    const node = this;
     this.tag = tag || 0;
     this.value = value || 0;
     this.history = history || 0;
+
+    this.getHistory = function() {
+        return node.history.get ? node.history.get() : node.history;
+    }
 }
 
 /************************ Cache *********************************/
@@ -66,10 +71,10 @@
             let children = blockElem.children();
             children.eq(index * 4 + 1).text(node.tag);
             children.eq(index * 4 + 2).text(node.value);
-            children.eq(index * 4 + 3).text(node.history);
+            children.eq(index * 4 + 3).text(node.getHistory());
             
             cache.container.animate({
-                scrollTop: 80 * (set - 1) + 50
+                scrollTop: blockElem[0].offsetTop - 100
             }, 200);
             blockElem.addClass('background-info');
             setTimeout(() => {
@@ -108,7 +113,7 @@
                 newRow.append(col.clone().text(j === 0 ? i : ""));
                 newRow.append(col.clone().text(node ? node.tag : "0"));
                 newRow.append(col.clone().text(node ? node.value : "0"));
-                newRow.append(col.clone().text(node ? node.history : "0"));
+                newRow.append(col.clone().text(node ? node.getHistory() : "0"));
             }
 
             container.append(newRow);

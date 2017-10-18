@@ -1,7 +1,7 @@
 // Branch Target Buffer
 function BTB() {
     this.cache = new associativeCache(256, 4);
-
+    
     // target address if predict to be taken, undefined otherwise
     this.predict = function(address) {
         let entry = this.cache.search(address);

@@ -8,7 +8,11 @@ function P5Pipe() {
     var decodeI, loadI, executeI, storeI; //var guarda a instrucao I na etapa n (nI)
 	var containerPipeline = $('<div class="container pipeline"></div>');
 	$("#pipelineDivGoesBeneath").append(containerPipeline);
-	
+    
+    this.init = function(dataMemory) {
+        pipeSim.dataMemory = dataMemory;
+    }
+
 	this.p5cycle = function(BTB, instructions, pc, execution, fillNoop) {
 
 		this.BTB = BTB;
@@ -217,10 +221,17 @@ function P5Pipe() {
                 elem.addClass("store");
             }, 100);
         }
-		
-        if(result.ula != undefined && instruction && instruction.type === DATA_TYPES.ARITHMETIC)
-        {
-            instruction.params.dest.set(result.ula);
+        
+        if (pipeSim.fillNoop === 0) {
+            if(result.ula != undefined && instruction && instruction.type === DATA_TYPES.ARITHMETIC)
+            {
+                instruction.params.dest.set(result.ula);
+            }
+            // Load and Store
+            if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER) 
+            {
+                instruction.executethis(pipeSim.dataMemory);
+            }
         }
     }
 

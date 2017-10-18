@@ -44,6 +44,65 @@ function Register(name, index) {
     }
 }
 
+/************************ Data Memory **************************
+ * get (address)
+ * set (address, value)
+ * render
+*/
+function DataMemory(size) {
+    const mem = this;
+    this.memoryArray = [];
+    this.size = size;
+
+    for (let i = 0; i < size; i++) {
+        this.memoryArray[i] = 0;
+    }
+
+    // Returns the value on address
+    this.get = function(address) {
+        if (address < 0 || address >= mem.size) { return undefined; }
+        return mem.memoryArray[address];
+    }
+
+    // Set the value on address
+    this.set = function(address, value) {
+        if (address < 0 || address >= mem.size) { return undefined; }
+        mem.memoryArray[address] = value;
+
+        // Updates HTML
+        let table = $("#dataMemory tbody");
+        let col = table.find('td').eq(address);
+        table.animate({
+            scrollTop: 0
+        }, 200);
+        col.text(value);
+        col.addClass("info");
+        setTimeout(function() {
+            col.removeClass("info");
+        }, 800)
+    }
+
+    // Renders the HTML table
+    this.render = function() {
+        let table = $("#dataMemory tbody");
+        let row = null;
+        mem.memoryArray.map((item, i) => {
+            if (i % 10 === 0) {
+                let rowI = i / 10;
+                if (row) {
+                    table.append(row);
+                }
+                row = $("<tr></tr>");
+                let colI = $(`<th>${rowI}</th>`);
+                row.append(colI);
+            }
+            let col = $(`<td>${item}</td>`);
+            row.append(col);
+        });
+        table.append(row);
+    }
+}
+
 function Simulator() {
     const sim = this;
     var execution;
@@ -66,7 +125,8 @@ function Simulator() {
 	
     this.fillNoop = 0;
 
-	this.BTB = new BTB();
+    this.BTB = new BTB();
+    this.DataMemory = new DataMemory(64);
     /********* Simulator params
      * registers: number of registers available
      * tempRegisters: number of temporary registers available
@@ -121,7 +181,8 @@ function Simulator() {
 
         sim.instructionSet = instructionSet;
         sim.instructions = instructions;
-		sim.architecture = architecture;
+        sim.architecture = architecture;
+        architecture.init(sim.DataMemory);
 		
 		var pc = 0;
 		
@@ -136,6 +197,7 @@ function Simulator() {
         
         sim.renderRegistersBank();
         sim.BTB.render($("#cacheContainer"));
+        sim.DataMemory.render();        
         
         // Execute
        
