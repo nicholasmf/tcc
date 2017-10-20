@@ -25,6 +25,7 @@ function Register(name, index) {
     this.set = function(value) {
         register.value = value;
 
+        if (register.name && register.name.indexOf("temp") !== -1) { return; }
         /****** Update render *****/
         const container = $("#registersContainer .row");
         let elem = container.children().eq(register.index);
@@ -120,7 +121,7 @@ function Simulator() {
         this.registersArray[i] = new Register(name, i);
     }
     for (let i = 0; i < this.tempRegisters; i++) {
-        this.tempRegistersArray[i] = new Register();
+        this.tempRegistersArray[i] = new Register("temp"+i, i);
     }
 	
     this.fillNoop = 0;

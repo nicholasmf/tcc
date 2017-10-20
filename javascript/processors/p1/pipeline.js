@@ -45,8 +45,8 @@ function P5Pipe() {
 		
 		pipeSim.decode();
 		pipeSim.load(loadI);
-		pipeSim.store(storeI, lastResult);
 		result = pipeSim.execute(executeI);//result eh da instrucao que esta no execute e lastResult eh da instrucao q ta no store
+		pipeSim.store(storeI, lastResult);
 		pipeSim.end(execution, pc);
 		console.log(executeI, result, pipeSim.fillNoop);
 		/*if (lastResult.pc != null && lastResult.pc != undefined) {
