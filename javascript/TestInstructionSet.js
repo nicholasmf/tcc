@@ -7,7 +7,7 @@ function getValue(elem) //verifica se o elemento eh um, objeto ou outra coisa
     else
     {
         return elem;
-    }    
+    }
 }
 
 var TestInstructionSet = new InstructionSet();
