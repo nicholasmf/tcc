@@ -1,76 +1,237 @@
-function P5Pipe() {
+function P5Pipe(htmlClass) {
     
 	const pipeSim = this;
 	
 	this.name = "P5";
 	
-	var instruction = null, result = null, lastResult = {};
+	var instruction = new Array(2);//simula meu buffer de 2 posicoes
+	var result = {}, lastResult = {};
     var decodeI, loadI, executeI, storeI; //var guarda a instrucao I na etapa n (nI)
-	var containerPipeline = $('<div class="container pipeline"></div>');
+	var containerPipeline = $('<div class="container pipeline ' + htmlClass + '"></div>');
 	$("#pipelineDivGoesBeneath").append(containerPipeline);
     
     this.init = function(dataMemory) {
         pipeSim.dataMemory = dataMemory;
     }
 
-	this.p5cycle = function(BTB, instructions, pc, execution, fillNoop) {
-
-		this.BTB = BTB;
-		this.pc = pc;
-		this.execution = execution;
-		this.fillNoop = fillNoop;
+	var correctlyPredictedYes;//retorna se o branch especulativo foi correto para o caso positivo
+	
+	//this.lastDecodeI;
+	
+	this.getExecuteInstruction = function()
+	{
+		return executeI;
+	}
+	
+	this.getLoadInstruction = function()
+	{
+		return loadI;
+	}
+	
+	this.setLoadInstruction = function(newInstruction)
+	{//yep, dangerous
+		loadI = newInstruction;
+	}
+	
+	this.getDecodeInstruction = function()
+	{
+		//return pipeSim.lastDecodeI;
+		return decodeI;
+	}
+	
+	this.getFetchInstruction = function(bufferNum)
+	{
+		return instruction[bufferNum];
+	}
+	
+	this.setFetchInstruction = function(newInstruction, bufferNum)
+	{//this is very dangerous!
+		instruction[bufferNum] = newInstruction;
+	}
+	
+	/*
+	this.setDecodeInstruction = function(newInstruction)
+	{
+		decodeI = newInstruction;
+	}
+	*/
+	
+	//pipeName eh so para funs de debug
+	this.p5cycle = function(BTB, instructions, pc, execution, fillNoop, substituteInstruction, pipeDo, inBuffer, cycle, pipeName) {
+		
+		correctlyPredictedYes = false;
+				
+		if(pipeDo.store)
+			lastResult = result;
+		
+		if(pipeDo.execute)
+			storeI = executeI;
+		if(pipeDo.load)
+			executeI = loadI;
+		
+		if(pipeDo.decode)
+			loadI = decodeI;
+		
+		if(!pipeDo.fetch && inBuffer.changedLastIter && !instruction[inBuffer.number])
+		{//se o fetch estiver travado, mas eu mudei meu buffer e o fetch nao tem nada, devo executar mesmo assim
+			instruction[inBuffer.number] = pipeSim.fetchStep(pc, instructions);
+		}
+		
+		if(pipeDo.fetch)
+		{
+			if(inBuffer.changedLastIter && fillNoop > 0)//so dou flush se errei a previsao
+			{//se o buffer mudou na ultima iteracao, devo avancar com o flush das instrucoes do buffer errado (o anterior)
+				if(inBuffer.number === 0)
+				{
+					decodeI = instruction[1];//falo para avancar com o buffer errado
+					instruction[1] = undefined;//e esvazio ele
+				}
+				else
+				{
+					decodeI = instruction[0];
+					instruction[0] = undefined;
+				}
+			}
+			else//se o buffer nao mudou, proceder normalmente
+				decodeI = instruction[inBuffer.number];		
+		}
+			
+		
+		//console.log("aD: " + decodeI + " aL: " + loadI + " aE: " + executeI + " aS: " + storeI);
 	
 	//instruction = sim.fetchStep((BTB.predict(pc) ? BTB.predict(pc) : pc < instructions.length ? pc : -1), instructions);//pega 1 unica instrucao por vez da minha lista de instrucoes		
-		var btbResult = decodeI ? BTB.predict(decodeI.address) : undefined;
-		if(btbResult && decodeI.type === DATA_TYPES.CONTROL)
+		//var btbResult = (decodeI && pipeDo.decode) ? BTB.predict(decodeI.address) : undefined;
+		var btbResult;
+		if(decodeI && pipeDo.decode)
 		{
-			instruction = pipeSim.fetchStep(btbResult, instructions)
-			decodeI.btbResult = true;
-			pc = btbResult;
-			console.log("btbResult:" + btbResult);
-		}
-		else if(pc < instructions.length)
-		{
-			instruction = pipeSim.fetchStep(pc, instructions);
+			btbResult = BTB.predict(decodeI.address);//btbResult recebe o endereco da instrucao q irei pular para (especulativamente)
 		}
 		else
-		{
-			instruction = pipeSim.fetchStep(-1, instructions);
-		}
-		if(!btbResult && instruction && decodeI)
-		{
-			decodeI.btbResult = false;
-		}
-		console.log("T0: " + T0.get() + " T1:" + T1.get());
+			btbResult = undefined;
 		
-		pipeSim.decode();
-		pipeSim.load(loadI);
-		result = pipeSim.execute(executeI);//result eh da instrucao que esta no execute e lastResult eh da instrucao q ta no store
-		pipeSim.store(storeI, lastResult);
+		console.log("btbR: " + btbResult);
+		
+		if(pipeDo.fetch)
+		{
+			console.log("executing " + pipeName + "fetch");
+			if(btbResult != undefined && decodeI.type === DATA_TYPES.CONTROL)
+			{
+				//obs deu branch especulativo, devo mudar o buffer e dar fetch nele se nao tiver nada la (o buffer sera mudado em architecture)
+				
+				/*
+				var aux;//auxiliar para nao perder valor de inBuffer
+				if(inBuffer.number === 0)
+				{
+					aux = 1;
+				}
+				else
+					aux = 0;
+				if(!instruction[aux])
+				{//se nao tiver nada no buffer q irei para, devo dar fetch
+					instruction[aux] = pipeSim.fetchStep(btbResult, instructions);
+				}
+				*/
+
+				//instruction[inBuffer.number] = pipeSim.fetchStep(btbResult, instructions)
+				decodeI.btbResult = true;
+				//pc = btbResult;
+				//console.log("btbResult:" + btbResult);
+			}
+			if(pc < instructions.length)
+			{
+				instruction[inBuffer.number] = pipeSim.fetchStep(pc, instructions);
+				if(instruction[inBuffer.number])
+					instruction[inBuffer.number].cycle = cycle;
+			}
+			else
+			{
+				instruction[inBuffer.number] = pipeSim.fetchStep(-1, instructions);
+			}
+			if(!btbResult && instruction[inBuffer.number] && decodeI)
+			{
+				decodeI.btbResult = false;
+			}
+		}
+		//console.log("T0: " + T0.get() + " T1:" + T1.get());
+		
+		//var substitution = {load:false, decode:false};
+		
+		
+		if(substituteInstruction.Place === 'load')
+		{
+			if(loadI)
+			{
+				console.log("substituting in load step " + loadI.name + " in " + pipeName + "for " + substituteInstruction.Instruction.name);
+			}
+				loadI = substituteInstruction.Instruction;
+				//substitution.load = true;
+		}
+		
+
+		if(pipeDo.decode)
+		{
+			console.log("executing " + pipeName + "decode");
+			pipeSim.decode(substituteInstruction);
+		}
+			
+		if(pipeDo.load)
+		{
+			console.log("executing " + pipeName + "load");
+			pipeSim.load(substituteInstruction);
+		}
+			
+		if(pipeDo.store)
+		{
+			console.log("executing " + pipeName + "store");
+			pipeSim.store(storeI, lastResult);
+		}
+			
+		if(pipeDo.execute)
+		{
+			console.log("executing " + pipeName + "execute");
+			result = pipeSim.execute(executeI);//result eh da instrucao que esta no execute e lastResult eh da instrucao q ta no store
+			if(correctlyPredictedYes)
+			{
+				if(inBuffer.number === 0)
+				{
+					console.log("destroying instruction in buffer 1"); 
+					instruction[1] = undefined;//invalido a instrucao em fetch do outro buffer
+				}
+				else
+				{
+					console.log("destroying instruction in buffer 0"); 
+					instruction[0] = undefined;
+				}
+			}
+		}
+			
 		pipeSim.end(execution, pc);
-		console.log(executeI, result, pipeSim.fillNoop);
-		/*if (lastResult.pc != null && lastResult.pc != undefined) {
-			pc = lastResult.pc;
-		}
-		else if (pipeSim.fillNoop > 0) {
-			pipeSim.fillNoop--;
-		}
-		else {
-			pc = ((pc < instructions.length) && (pc >= 0)) ? pc + 1 : -1;
-		}*/
+		
+		if( !instruction[inBuffer.number] && !decodeI && !loadI && !executeI && !storeI )//se meu pipe estiver vazio depois de uma execucao, encerro
+			clearInterval(execution);
+		//console.log(executeI, result, pipeSim.fillNoop);
+
 		if(executeI && executeI.type === DATA_TYPES.CONTROL){
 			pipeSim.BTB.update(executeI.address, executeI.params.branchTo, executeI.params.branchResult);
 			//console.log(executeI.address);
 		}
 		
-		var lastResultReturn = lastResult;
-		lastResult = result;
-		storeI = executeI;
-		executeI = loadI;
-		loadI = decodeI;
-		decodeI = instruction;
+		if(instruction[0])
+			console.log(pipeName + "F0: " + instruction[0].name + " addr: " + instruction[0].address);
+		if(instruction[1])
+			console.log(pipeName + "F1: " + instruction[1].name + " addr: " + instruction[1].address);
+		if(decodeI)
+			console.log(pipeName + "D: " + decodeI.name + " addr: " + decodeI.address);
+		if(loadI)
+			console.log(pipeName + "L: " + loadI.name + " addr: " + loadI.address);
+		if(executeI)
+			console.log(pipeName + "E: " + executeI.name + " addr: " + executeI.address);
+		if(storeI)
+			console.log(pipeName + "S: " + storeI.name + " addr: " + storeI.address);
 		
-		return [result, pipeSim.fillNoop, btbResult];
+		var lastResultReturn = lastResult;
+		
+		return [result, pipeSim.fillNoop, btbResult, correctlyPredictedYes];
 	}
 	
 	/*************** Fetch *********************/
@@ -103,7 +264,7 @@ function P5Pipe() {
             setTimeout(function() {
                 //elem.detach();
                 containerPipeline.append(instructionElem);
-            }, 100);//talvez nao precise de delay
+            }, 60);//talvez nao precise de delay
 
             return instructions[pc];//retorna a instrucao na posicao pc
         }
@@ -113,39 +274,38 @@ function P5Pipe() {
     }
 
     /***************** Decode *********************/
-    this.decode = function() {//so parte grafica, por enquanto?
+    this.decode = function(substituteInstruction) {//so parte grafica, por enquanto?
         var count =  containerPipeline.children(".fetch").length;
         var instruction = containerPipeline.children(".fetch:eq(0)");
         if (count) {
             setTimeout(function() {
+				if(substituteInstruction.Place === 'decode')
+				{
+					instruction.detach();
+					containerPipeline.append("<div class='pipeline-item background-info decode'>" + substituteInstruction.Instruction.name + "</div>")
+				}
                 instruction.removeClass("fetch");//muda as caracteristicas do html (abaixo) pra passar cada bloquinho para a proxima etapa
                 instruction.addClass("decode");//"<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>"
-            }, 100)
+            }, 80)
         }
 				
-				
-		/*
-		preciso pegar a posicao pc de cada instrucao
-		if(decodeI1.pc < decodeI2.pc ) {  //instrucoes estao em ordem no buffer i.e. [pc, pc+1]
-			if(decodeI2.executableInV) {
-			useVPipe = pairingCheck(decodeI1, decodeI2);
-			}
-		}
-		else {//instrucoes estao em ordem reversa no buffer i.e. [pc, pc-1] (acontece se instrucoes nao sao pareadas e o pipe V fica vazio)
-			if(decodeI1.executableInV) {
-			useVPipe = pairingCheck(decodeI2, decodeI1);
-			}
-		}
-		*/
-		
-		
     }
 
-    this.load = function() {
+    this.load = function(substituteInstruction) {
         var count = containerPipeline.children(".decode").length;
         var instruction = containerPipeline.children(".decode:eq(0)");
         if (count) {
             setTimeout(function() {
+				if(substituteInstruction.Place == 'load')
+				{
+					if(substituteInstruction.Instruction.name == 'NoOp')
+					{
+						instruction.detach();
+						containerPipeline.append("<div class='pipeline-item background-danger load'>" + substituteInstruction.Instruction.name + "</div>");
+					}
+					else
+						containerPipeline.append("<div class='pipeline-item background-info load'>" + substituteInstruction.Instruction.name + "</div>");
+				}
                 instruction.removeClass("decode");//muda as caracteristicas do html pra passar cada bloquinho para a proxima etapa(idem ao anterior)
                 instruction.addClass("load");
             }, 100);
@@ -167,7 +327,7 @@ function P5Pipe() {
                     elem.removeClass("background-info");//retira o azul do bloquinho e coloca verde
                     elem.addClass("background-success");//nota: essas cores estao no .css              
                 }
-            }, 100);
+            }, 120);
         }
 		if(isFlushing)
 		{
@@ -194,17 +354,23 @@ function P5Pipe() {
 					instruction.executethis();
 				}
 				console.log(instruction.params.branchResult, instruction.btbResult);
-				if (instruction.params.branchResult !== instruction.btbResult) {
-					this.flush(3);
+				if (instruction.params.branchResult !== instruction.btbResult)
+				{
+					this.flush(3);//comeco a dar flush se a previsao foi errada
 					//console.log("gone flushing");
 					if(instruction.params.branchResult)
-					{
+					{//pula o pc para a instrucao alvo
 						result.pc = instruction.getTargetAddr();
 					}
 					else
-					{
+					{//senao pula o pc para + 1
 						result.pc = instruction.address + 1;
 					}
+				}
+				else if(instruction.params.branchResult && instruction.btbResult)
+				{//previ certo (branch: verdadeiro e especulacao: verdadeiro)
+				//devo invalidar o buffer q nao estou mais usando
+					correctlyPredictedYes = true;
 				}
 			}	
 		}
@@ -219,7 +385,7 @@ function P5Pipe() {
             setTimeout(function() {
                 elem.removeClass("execute");
                 elem.addClass("store");
-            }, 100);
+            }, 140);
         }
         
         if (pipeSim.fillNoop === 0) {
@@ -257,15 +423,23 @@ function P5Pipe() {
                 instructionList.animate({
                     scrollTop: instructionList[0].scrollHeight
                 }, 200);
-            }, 100);
+            }, 160);
         }
-        else if (pc === -1 && interval) {
-            clearInterval(interval);
-        }
-    }
+    }	
 	
 	this.flush = function(cicles) {
 		pipeSim.fillNoop = cicles + 1;
-		console.log("psfn: " + pipeSim.fillNoop);
+		$(".fetch,.decode,.load").not(".background-danger").removeClass("background-info");
+		//console.log("pipeSim.fillNoop: " + pipeSim.fillNoop);
+		
+		
+		/*
+		let elems = $(".fetch,.decode,.load").not(".background-danger");
+		elems.removeClass('background-info');
+		elems.addClass('background-danger');
+		elems.text('NoOp');
+		*/
+		
+		//console.log("psfn: " + pipeSim.fillNoop);
     }
 }

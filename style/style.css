@@ -59,6 +59,17 @@
     }
 }
 
+.pipeline {
+    height: 100px;
+	width: 100%;
+    position: absolute;
+}
+
+.pipeline:nth-child(2) {
+    top: 100px;
+}
+
+
 .pipeline-item.fetch {
     left: 10%; /*so marca a posicao, basicamente */
 }

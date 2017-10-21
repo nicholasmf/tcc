@@ -124,9 +124,6 @@ function Simulator() {
         this.tempRegistersArray[i] = new Register("temp"+i, i);
     }
 	
-    this.fillNoop = 0;
-
-    this.BTB = new BTB();
     this.DataMemory = new DataMemory(64);
     /********* Simulator params
      * registers: number of registers available
@@ -185,8 +182,6 @@ function Simulator() {
         sim.architecture = architecture;
         architecture.init(sim.DataMemory);
 		
-		var pc = 0;
-		
         // Render
         var instructionsList = document.getElementById("instructions");
         instructions.map((instruction) => {
@@ -197,7 +192,6 @@ function Simulator() {
         });
         
         sim.renderRegistersBank();
-        sim.BTB.render($("#cacheContainer"));
         sim.DataMemory.render();        
         
         // Execute
@@ -205,24 +199,9 @@ function Simulator() {
 
         sim.cicle = function() {   
 			
-			var cycleReturns = architecture.p5cycle(sim.BTB, instructions, pc, execution, sim.fillNoop);
-            sim.fillNoop = cycleReturns[1];
-            if (cycleReturns[2]) {
-                pc = cycleReturns[2];
-            }
-			if (cycleReturns[0].pc != null && cycleReturns[0].pc != undefined) {
-				pc = cycleReturns[0].pc;
-			}
-			// else if (sim.fillNoop > 0) {
-			// 	sim.fillNoop--;
-			// }
-			else {
-				pc = ((pc < instructions.length) && (pc >= 0)) ? pc + 1 : -1;
-			}
-			if (sim.fillNoop > 0) {
-                sim.fillNoop--;
-			}
-			console.log("pc: " + pc + " LR: " + sim.fillNoop);
+			sim.architecture.p5Arq(instructions, execution);
+			//console.log("gDI: " + sim.architecture.getDecodeInstruction().name);
+			//console.log("pc: " + pc + " LR: " + sim.fillNoop);            
         };
 		if (sim.timeInterval) {
 			execution = setInterval(sim.cicle , sim.timeInterval * 1000);

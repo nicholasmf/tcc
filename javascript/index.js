@@ -13,9 +13,12 @@ const T4 = simulator.registersArray[4];
 const V0 = simulator.registersArray[50];
 
 function start() {
-	var architecture = new P5Pipe();
+	//var architecture = new P5Pipe("");
+	//var architecture1 = new P5Pipe();
+	var architecture = new P5Arq();
 	simulator.clear();
     simulator.run(iSet, code, architecture);
+	//simulator.run(iSet, code, architecture1);
 }
 
 function resume() {
@@ -33,10 +36,47 @@ function nextStep() {
 function setInstructionset() {
     var select = $("#selectInstructionset");
     var value = select.val();
-
-    if (value === "test") {
+	
+	
+	
+	if (value === "test") {
         iSet = TestInstructionSet;
-
+		
+		/*
+        code = [
+            iSet.SET(T0, 0),
+			iSet.LOAD(),
+            iSet.LOAD(),
+			iSet.BRANCH_IF_ZERO(T0, 1),
+			iSet.SET(T0, 1),
+			iSet.LOAD(),
+			iSet.LOAD(),
+			
+        ];
+		*/
+    
+	
+	
+	
+	 code = [
+		 iSet.LOADI(T0, 0),
+		 iSet.BRANCH_IF_ZERO(T0, 5),
+		 iSet.DUMMY(),
+		 iSet.DUMMY(),
+		 iSet.DUMMY(),
+		 iSet.LOADI(T1, -4),
+		 iSet.ADD(T1, 1),
+		 iSet.BRANCH_IF_ZERO(T1, 9),
+		 iSet.BRANCH_IF_ZERO(T0, 6),
+		 iSet.LOADI(T0, 1),
+		 iSet.DUMMY(),
+		 iSet.DUMMY(),
+		 iSet.DUMMY(),
+    
+	];
+	
+	
+		/*
         code = [
             iSet.ADD(T1, 5),
             iSet.ADD(T0, 4),
@@ -56,6 +96,7 @@ function setInstructionset() {
 			iSet.DUMMY(),
 			iSet.DUMMY(),
         ];
+		*/
     }
     else if (value === "test2") {
         iSet = Test2InstructionSet;
@@ -97,17 +138,17 @@ function setTimeInterval() {
 // let code = [
 //     iSet.SET(T0, 0),
 //     iSet.BRANCH_IF_ZERO(T0, 5),
-//     iSet.LOAD(),
-//     iSet.LOAD(),
-//     iSet.LOAD(),
+//     iSet.DUMMY(),
+//     iSet.DUMMY(),
+//     iSet.DUMMY(),
 //     iSet.SET(T1, -4),
 //     iSet.ADD(T1, 1),
 //     iSet.BRANCH_IF_ZERO(T1, 9),
 //     iSet.BRANCH_IF_ZERO(T0, 6),
 //     iSet.SET(T0, 1),
-//     iSet.LOAD(),
-//     iSet.LOAD(),
-//     iSet.LOAD(),
+//     iSet.DUMMY(),
+//     iSet.DUMMY(),
+//     iSet.DUMMY(),
     
 // ];
 
