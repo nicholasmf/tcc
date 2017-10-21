@@ -26,7 +26,7 @@ Test2InstructionSet.LOAD = function (dest, address)
     return new Instruction("LOAD", DATA_TYPES.DATA_TRANSFER, null, {address: address, dest : dest}, true, function(memory) 
     {
         let value = memory.get(address);
-        dest.set(value);
+        this.params.dest.set(value);
     });
 };
 Test2InstructionSet.LOADI = function(dest, value) 

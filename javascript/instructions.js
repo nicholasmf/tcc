@@ -16,6 +16,8 @@ function Instruction (name, type, MicroInstruction, params, executableInV, execu
     this.params = params;
 	this.executableInV = executableInV;
     this.executethis = executethis;
+    this.latency = 1;
+    this.executedCycles = 0;
     if (params) {
         this.branchResult = params.branchResult;//veracidade do jump
         this.branchTo = params.branchTo;//endereco do jump
