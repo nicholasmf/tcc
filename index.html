@@ -70,17 +70,42 @@
         <nav class="navbar">
             <h4>Opções</h4>
             <form class="form-inline margin-bottom-20">
-                <select class="form-control mr-sm-2" id="selectInstructionset" onchange="setInstructionset()">
+                <!--<select class="form-control mr-sm-2" id="selectInstructionset" onchange="setInstructionset()">
                     <option value="">-- Selectione um instruction set --</option>
                     <option value="test">Test Instructionset</option>
                     <option value="test2">Test2 Instructionset</option>                
+                </select>-->
+                <select class="form-control mr-sm-2" id="selectBP" onchange="setBP">
+                    <option value="">-- Preditor de desvio --</option>
+                    <option value="btb">P5 BTB</option>
+                    <option value="apbtb">Predição adaptativa</option>
+                </select>
+
+                <select class="form-control mr-sm-2" id="selectPipe" onchange="setPipe">
+                    <option value="">-- Pipeline --</option>
+                    <option value="dummy" selected>Simples</option>
+                    <option value="netburst" disabled>NetBurst</option>
+                    <option value="p5" disabled>P5</option>
+                </select>
+
+                <select class="form-control mr-sm-2" id="selectDH" onchange="setDH">
+                    <option value="">-- Dependências --</option>
+                    <option value="ignore" selected>Ignorar</option>
+                    <option value="stall" disabled>Esperar dependência</option>
+                    <option value="OoO" disabled>Execução fora de ordem</option>
+                    <option value="OoOrenaming">Execução fora de ordem com renomeamento</option>
                 </select>
 
                 <select class="form-control mr-sm-2" id="selectTimeInterval" onchange="setTimeInterval()">
-                    <option value="">-- Selecione um intervalo de execução --</option>
-                    <option value="1">1 segundo</option>
+                    <option value="">-- Intervalo de execução --</option>
+                    <option value="1" selected>1 segundo</option>
                     <option value="2">2 segundos</option>
                     <option value="5">5 segundos</option>
+                </select>
+
+                <select class="form-control mr-sm-2" id="selectCode" onchange="setCode()">
+                    <option value="">-- Codigo de programa</option>
+                    <option value="code1" selected>Programa 1</option>
                 </select>
 
                 <input class="btn btn-primary my-sm-2" type="button" value="Start" onclick="start()"/>

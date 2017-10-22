@@ -150,6 +150,11 @@
 .background-danger {
     background-color: #f2dede;
 }
+
+.background-disabled {
+    background-color: #dfdfdf;
+}
+
 .no-padding {
     padding: 0;
 }

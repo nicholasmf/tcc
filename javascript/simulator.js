@@ -102,6 +102,13 @@ function DataMemory(size) {
         });
         table.append(row);
     }
+
+    // Clear - set 0 for all addressess
+    this.clear = function() {
+        for (let i = 0; i < size; i++) {
+            this.memoryArray[i] = 0;
+        }
+    }
 }
 
 function Simulator() {
@@ -151,7 +158,16 @@ function Simulator() {
 			finalList.innerHTML = "";
 			//$(pipeline).html("");
 			//$(".pipeline").html("");
-		}
+        }
+        
+
+        for (let i = 0; i < this.registers; i++) {
+            this.registersArray[i].set(0);
+        }
+        for (let i = 0; i < this.tempRegisters; i++) {
+            this.tempRegistersArray[i].set(0);
+        }
+        sim.DataMemory.clear();
     }
 
     this.resume = function() {
@@ -172,6 +188,19 @@ function Simulator() {
 
     this.setTimeInterval = function(value) {
         sim.timeInterval = value;
+    }
+
+    this.setBP = function(bp) {
+        if (bp)
+            sim.branchPredictor = bp;
+    }
+
+    this.setRename = function(rename) {
+        sim.rename = rename;
+    }
+
+    this.setoutOfOrder = function(OoO) {
+        sim.outOfOrder = OoO;
     }
 
     this.run = function(instructionSet, instructions, architecture) {
@@ -195,7 +224,7 @@ function Simulator() {
         sim.DataMemory.render();        
         
         // Execute
-       
+       console.log(sim.architecture.name);
 
         sim.cicle = function() {   
 			
