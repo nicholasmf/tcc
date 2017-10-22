@@ -14,8 +14,8 @@ const V0 = simulator.registersArray[50];
 
 function start() {
 	//var architecture = new P5Pipe("");
-	//var architecture1 = new P5Pipe();
 	//var architecture = new P5Arq();
+	var architecture = new DummyPipe();
 	simulator.clear();
     simulator.run(iSet, code, architecture);
 	//simulator.run(iSet, code, architecture1);
@@ -65,6 +65,7 @@ function setInstructionset() {
 		 iSet.DUMMY(),
 		 iSet.DUMMY(),
 		 iSet.LOADI(T1, -4),
+		 iSet.DUMMY(),
 		 iSet.ADD(T1, 1),
 		 iSet.BRANCH_IF_ZERO(T1, 9),
 		 iSet.BRANCH_IF_ZERO(T0, 6),
@@ -192,36 +193,3 @@ function checkWaW(i1, i2) {
     }
     return false;
 }
-
-	iSet = TestInstructionSet;
-	 code = [
-		 iSet.LOADI(T0, -1),
-		 iSet.DUMMY(),
-		 iSet.DUMMY(),
-		 iSet.DUMMY(),
-		 iSet.ADD(T0, 1),
-		 iSet.DUMMY(),
-		 iSet.DUMMY(),
-		 iSet.DUMMY(),
-		 iSet.BRANCH_IF_ZERO(T0, 1),
-		 iSet.LOADI(T1, 9),
-
-		 
-	];
-
-window.onload = function() { 
-    var myPipe = new DummyPipe(code);    
-    var dataMem = new DataMemory(64);
-    simulator.renderRegistersBank();
-    dataMem.render();
-
-    // List Render -- Remover apos integracao com simulator
-    var instructionsList = document.getElementById("instructions");
-    code.map((instruction) => {
-        var newItem = document.createElement('li');
-        newItem.textContent = instruction.name;
-        newItem.className = 'list-group-item';
-        instructionsList.appendChild(newItem);
-    });
-}
-myPipe.init(dataMem);

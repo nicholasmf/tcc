@@ -199,7 +199,9 @@ function Simulator() {
 
         sim.cicle = function() {   
 			
-			sim.architecture.p5Arq(instructions, execution);
+			//sim.architecture.p5Arq(instructions, execution);
+			sim.architecture.pipeLoop(instructions, execution);
+			
 			//console.log("gDI: " + sim.architecture.getDecodeInstruction().name);
 			//console.log("pc: " + pc + " LR: " + sim.fillNoop);            
         };
