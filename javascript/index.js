@@ -15,7 +15,7 @@ const V0 = simulator.registersArray[50];
 function start() {
 	//var architecture = new P5Pipe("");
 	//var architecture1 = new P5Pipe();
-	var architecture = new P5Arq();
+	//var architecture = new P5Arq();
 	simulator.clear();
     simulator.run(iSet, code, architecture);
 	//simulator.run(iSet, code, architecture1);
@@ -193,3 +193,27 @@ function checkWaW(i1, i2) {
     return false;
 }
 
+	iSet = TestInstructionSet;
+	 code = [
+		 iSet.LOADI(T0, -1),
+		 iSet.DUMMY(),
+		 iSet.DUMMY(),
+		 iSet.DUMMY(),
+		 iSet.ADD(T0, 1),
+		 iSet.DUMMY(),
+		 iSet.DUMMY(),
+		 iSet.DUMMY(),
+		 iSet.BRANCH_IF_ZERO(T0, 1),
+		 iSet.LOADI(T1, 9),
+
+		 
+	];
+
+var myPipe = new DummyPipe(code);
+
+var dataMem = new DataMemory(64);
+window.onload = function() { 
+  simulator.renderRegistersBank();
+   dataMem.render();
+}
+myPipe.init(dataMem);

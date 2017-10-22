@@ -330,21 +330,7 @@ function P5Pipe(htmlClass) {
             }, 120);
         }
 		if(isFlushing)
-		{
-			if (instruction && instruction.name === "SET") {
-                var source = instruction.params.source;
-                var dest = instruction.params.dest;
-    
-                source = isObject(source) ? source.get() : source;
-    
-                if (!isNaN(source)) {
-                    dest.set(source);
-                }
-                else {
-                    dest.set(0);
-                }
-            }
-			
+		{	
 			if(instruction && instruction.type === DATA_TYPES.ARITHMETIC)
 			{
 				result.ula = instruction.executethis();

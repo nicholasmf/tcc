@@ -1,7 +1,9 @@
-function PipelineStep(nane, execution, params) {
+function PipelineStep(stepName, stepExecution, params) {
+	
     const pipeStep = this;
-    this.name = name;
-    this.execution = execution;
+    const name = stepName;
+    this.execution = stepExecution;
+	var instruction;
     for (let property in params) {
         // Handle each property of params
         this[property] = params[property];
@@ -9,6 +11,32 @@ function PipelineStep(nane, execution, params) {
             // Do something
         }
     }
+	
+	
+	this.getStepInstruction = function()
+	{
+		return instruction;
+	}
+
+	this.setStepInstruction = function(newInstruction)
+	{
+		instruction = newInstruction;
+	}
+	
+	this.setStepInstructionCycle = function(cycle)
+	{
+		if(instruction)
+			instruction.cycle = cycle;
+	}
+
+	this.getStepName = function()
+	{
+		return name;
+	}
+	
+	
+	
+	
 
     this.render = function(prevStep) {
         var count =  containerPipeline.children(`.${prevStep}`).length;
