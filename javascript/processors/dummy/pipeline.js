@@ -65,7 +65,8 @@ function DummyPipe(instructions) {
 	var executionReturns = -1;
 	
     this.name = "Dummy Pipeline";
-
+	var containerPipeline = $('<div class="container pipeline"></div>');
+	$("#pipelineDivGoesBeneath").append(containerPipeline);
 	
 	this.init = function(dataMemory) {
 		SimplePipe.dataMemory = dataMemory;
@@ -76,8 +77,72 @@ function DummyPipe(instructions) {
 	this.decode = new PipelineStep("decode", decodeExecution);
 	this.load = new PipelineStep("load", loadExecution);
 	this.execute = new PipelineStep("execute", executeExecution);
-	this.store = new PipelineStep("store", storeExecution);
-	
+    this.store = new PipelineStep("store", storeExecution);
+    
+    // Overwrite fetch render
+    this.fetch.render = function(pc) {
+        		//var midCol = $("#pipelineDivGoesBeneath");
+		//midCol.append(containerPipeline);
+        //var pipeline = $('<div class="container pipeline">\n</div>');//$(".pipeline");	
+        var instructionList = $("#instructions");
+        instructionList.children('.active').removeClass('active');
+        // if (pipeSim.fillNoop > 0) {
+        //     var instructionElem = $("<div class='pipeline-item background-danger fetch'>NoOp</div>");
+        //     setTimeout(function() {
+        //         //elem.detach();
+        //         pipeline.append(instructionElem);
+        //     }, 100);
+        //     return new Instruction("NoOp");
+        // }
+        // else 
+        if (pc > -1) {
+            var instruction = this.getStepInstruction();
+            console.log(instruction);
+            if (!instruction) { return; }
+            var instructionElem = $("<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>");
+                                    //<div class='formato cor posicao'></div>
+            //var elem = instructionList.children(":eq(0)");
+            //elem.addClass("out");
+            var elem = instructionList.children(`:eq(${pc})`);
+            elem.addClass('active');
+            $("#instructions").animate({
+                scrollTop: 42*(pc-1) - 4
+            }, 200);
+            setTimeout(function() {
+                //elem.detach();
+                console.log(containerPipeline);
+                containerPipeline.append(instructionElem);
+            }, 60);//talvez nao precise de delay
+        }
+    }
+
+    // Remove First element on store step
+    this.removeHTMLInstruction = function(delay) {
+        var count =  containerPipeline.children(".store").length;
+        var instruction = containerPipeline.children(".store:eq(0)");
+        var pipeline = $(".pipeline");
+        var instructionList = $("#finalList");
+        var instructionElem = $("<li class='list-group-item'>" + instruction.text() + "</li>");
+
+        if (instruction.hasClass("background-success")) {
+            instructionElem.addClass("list-group-item-success");
+        }
+        if (instruction.hasClass("background-danger")) {
+            instructionElem.addClass("list-group-item-danger");
+        }
+
+        if (count) {
+            instruction.addClass("out");
+            setTimeout(function() {
+                instruction.detach();
+                instructionList.append(instructionElem);
+                instructionList.animate({
+                    scrollTop: instructionList[0].scrollHeight
+                }, 200);
+            }, delay);
+        }
+    }
+
 	do 
 	{
 		executionReturns = -1;
@@ -88,7 +153,8 @@ function DummyPipe(instructions) {
 		this.decode.setStepInstruction( this.fetch.getStepInstruction() );
 		
 		/////////////////// execucao das etapas /////////////////////////////
-		this.fetch.execution(instructions, pc, cycle);
+        this.fetch.execution(instructions, pc, cycle);
+        this.fetch.render(pc);
 		cycle++;
 
 		//executo fetch, pois ele apenas pega a proxima instrucao da memoria

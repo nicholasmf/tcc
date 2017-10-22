@@ -209,11 +209,19 @@ function checkWaW(i1, i2) {
 		 
 	];
 
-var myPipe = new DummyPipe(code);
-
-var dataMem = new DataMemory(64);
 window.onload = function() { 
-  simulator.renderRegistersBank();
-   dataMem.render();
+    var myPipe = new DummyPipe(code);    
+    var dataMem = new DataMemory(64);
+    simulator.renderRegistersBank();
+    dataMem.render();
+
+    // List Render -- Remover apos integracao com simulator
+    var instructionsList = document.getElementById("instructions");
+    code.map((instruction) => {
+        var newItem = document.createElement('li');
+        newItem.textContent = instruction.name;
+        newItem.className = 'list-group-item';
+        instructionsList.appendChild(newItem);
+    });
 }
 myPipe.init(dataMem);
