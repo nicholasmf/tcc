@@ -229,6 +229,28 @@ function DummyPipe() {
         }
     }
 
+    // Override execute render - change color to success if executed
+    this.execute.render = function(prevStep, containerPipeline) {
+        var self = this;
+        var count =  containerPipeline.children(`.${prevStep}`).length;
+        var instruction = containerPipeline.children(`.${prevStep}:eq(0)`);
+        var isFlushing = this.getStepInstruction().cycle - flushControl <= 3;
+        if (count) {
+            setTimeout(function() {
+                instruction.removeClass(prevStep);//muda as caracteristicas do html (abaixo) pra passar cada bloquinho para a proxima etapa
+                instruction.addClass(self.getStepName());//"<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>"
+                if (instruction.hasClass("background-info") && !isFlushing) {//background info eh "azul"
+                    instruction.removeClass("background-info");//retira o azul do bloquinho e coloca verde
+                    instruction.addClass("background-success");//nota: essas cores estao no .css              
+                }
+                else if (instruction.hasClass('background-info') && isFlushing) {
+                    instruction.removeClass("background-info");//retira o azul do bloquinho e coloca verde
+                    instruction.addClass("background-disabled");//nota: essas cores estao no .css                                  
+                }
+            }, 80)
+        }
+    }
+
     // Remove First element on store step
     this.removeHTMLInstruction = function(delay) {
         var count =  containerPipeline.children(".store").length;
@@ -242,6 +264,9 @@ function DummyPipe() {
         }
         if (instruction.hasClass("background-danger")) {
             instructionElem.addClass("list-group-item-danger");
+        }
+        if (instruction.hasClass("background-disabled")) {
+            instructionElem.addClass("disabled");
         }
 
         if (count) {
