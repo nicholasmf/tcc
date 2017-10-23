@@ -17,7 +17,7 @@ function Register(name, index) {
     this.get = function() {
         return register.value;
     }
-    this.set = function(value) {
+    this.set = function(value, noAnimation) {
         register.value = value;
 
         if (register.name && register.name.indexOf("temp") !== -1) { return; }
@@ -25,6 +25,8 @@ function Register(name, index) {
         const container = $("#registersContainer .row");
         let elem = container.children().eq(register.index);
         $(elem).find('.panel-body').text(value);
+
+        if (noAnimation) { return; }
         let panel = elem.children()[0];
         $(panel).removeClass('panel-default');
         $(panel).addClass('panel-info');
@@ -61,17 +63,19 @@ function DataMemory(size) {
     }
 
     // Set the value on address
-    this.set = function(address, value) {
+    this.set = function(address, value, noAnimation) {
         if (address < 0 || address >= mem.size) { return undefined; }
         mem.memoryArray[address] = value;
 
         // Updates HTML
         let table = $("#dataMemory tbody");
         let col = table.find('td').eq(address);
+        col.text(value);
+
+        if (!noAnimation) { return; }
         table.animate({
             scrollTop: 0
         }, 200);
-        col.text(value);
         col.addClass("info");
         setTimeout(function() {
             col.removeClass("info");
@@ -101,7 +105,7 @@ function DataMemory(size) {
     // Clear - set 0 for all addressess
     this.clear = function() {
         for (let i = 0; i < size; i++) {
-            this.memoryArray[i] = 0;
+            this.set(i, 0, true);
         }
     }
 }
@@ -157,10 +161,10 @@ function Simulator() {
         
 
         for (let i = 0; i < this.registers; i++) {
-            this.registersArray[i].set(0);
+            this.registersArray[i].set(0, true);
         }
         for (let i = 0; i < this.tempRegisters; i++) {
-            this.tempRegistersArray[i].set(0);
+            this.tempRegistersArray[i].set(0, true);
         }
         sim.DataMemory.clear();
     }

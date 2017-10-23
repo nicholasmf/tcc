@@ -126,13 +126,15 @@ function setDH() {
     if (val === "stall") { simulator.setDependencyHandler(new StallHandler()); }
     if (val === "OoO");
     if (val === "OoOrenaming") {
-        
+        var arf = new ARF();
+        var rshandler = new RSHandler(256);
+        simulator.setDependencyHandler(rshandler);
     }
 }
 
 function setCode() {
     var val = $("#selectCode").val();
-    if (val === code1) {
+    if (val === "code1") {
         code = [
             iSet.LOADI(T0, 0),
             iSet.BRANCH_IF_ZERO(T0, 5),
@@ -150,6 +152,18 @@ function setCode() {
             iSet.DUMMY(),
             iSet.DUMMY(),
        ];
+    }
+    else if (val === "code2") {
+        iSet = Test2InstructionSet;
+        code = [
+            iSet.STORE(3, 3),
+            iSet.STORE(5, 5),
+            iSet.LOAD(T0, 3),
+            iSet.LOAD(T1, 5),
+            iSet.ADD(T2, T0, T1),
+            iSet.ADD(T0, T0, 2),
+            iSet.ADD(T0, 6, 1)
+        ];
     }
 }
 

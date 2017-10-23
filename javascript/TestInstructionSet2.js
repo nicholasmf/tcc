@@ -22,14 +22,14 @@ Test2InstructionSet.LOADI = function(dest, value)
 {
     return new Instruction("LOADI", DATA_TYPES.DATA_TRANSFER, null, {dest: dest, value: value}, true, function() 
     {
-        dest.set(value);
+        this.params.dest.set(value);
     });
 }
 Test2InstructionSet.STORE = function(source, address)
 {
     return new Instruction("SAVE", DATA_TYPES.DATA_TRANSFER, null, {address: address, source: source}, true, function(memory)
     {
-        let value = getValue(source);
+        let value = getValue(this.params.source);
         memory.set(address, value);
     });
 }

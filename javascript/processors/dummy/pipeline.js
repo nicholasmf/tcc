@@ -27,7 +27,8 @@ function decodeExecution(dh) {
 }
 
 function loadExecution() {
-	
+    let instruction = this.getStepInstruction();
+    instruction.executedCycles++;
 }
 
 function executeExecution(branchPredictor) {
@@ -52,7 +53,7 @@ function executeExecution(branchPredictor) {
 			branchDestination = instruction.params.branchTo;
 
 		}
-	}
+    }
 }
 
 function storeExecution(dataMemory, dh) {

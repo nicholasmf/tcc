@@ -121,15 +121,17 @@ function RS(ins, vj, vk, qj, qk, a) {
  *      - getExecutables()
  */ 
 
-function RSHandler(size, arf) {
+function RSHandler(size) {
     const stations = this;
     var size = size;
     var array = [];
     var pos = 0;
-    var arf = arf;
+    var arf = new ARF();
 
     // Insert a instruction on reservation stations
     this.insert = function(instruction) {
+        rename(instruction, arf);
+
         if (instruction.type === DATA_TYPES.ARITHMETIC) {
             let source = isObject(instruction.params.source) ? instruction.params.source : undefined;
             let source1 = isObject(instruction.params.source1) ? instruction.params.source1 : undefined;
@@ -144,7 +146,7 @@ function RSHandler(size, arf) {
             array[pos++] = new RS(instruction,  s1 ? undefined : s1val, source2 ? undefined : s2val, s1, source2);
         }
         else if (instruction.type === DATA_TYPES.DATA_TRANSFER) {
-            let a = instruction.params.address;
+            let a = instruction.params.address || instruction.params.value;
             array[pos++] = new  RS(instruction, undefined, undefined, undefined, undefined, a);
         }
     }
@@ -173,7 +175,7 @@ function RSHandler(size, arf) {
     // Clear rs of instruction - if instruction has dest, remove from ARF and update original register
     this.wb = function(instruction) {
         let rs = stations.getRS(instruction);
-        rs.remove();
+        if (!rs) return;
         let dest = instruction.params.dest;
         if (isObject(dest)) {
             stations.update(dest);
@@ -185,6 +187,7 @@ function RSHandler(size, arf) {
 
 // Rename registers from instruction
 function rename(instruction, arf) {
+    if (!instruction.params) { return; }
     let dest = isObject(instruction.params.dest) ? instruction.params.dest : undefined;
     let source = isObject(instruction.params.source) ? instruction.params.source : undefined;
     let source1 = isObject(instruction.params.source1) ? instruction.params.source1 : undefined;
@@ -207,103 +210,103 @@ function rename(instruction, arf) {
 
 }
 
-let arf = new ARF();
+// let arf = new ARF();
 // RSHandler consegue receber 3 instrucoes por vez - p6
 // 5 instrucoes por ciclo podem sair da reservation stations para execucao
-let rshandler = new RSHandler(256, arf);
-let datamem = new DataMemory(64);
-iSet = Test2InstructionSet;
-let i1 = iSet.ADD(T0, 1);
-let i2 = iSet.ADD(T1, T0);
-let i3 = iSet.ADD(T1, 2);
-let i4 = iSet.ADD(T2, 2);
-let b1 = iSet.BRANCH_IF_ZERO(T0, 3);
-let b2 = iSet.BRANCH_IF_ZERO(T1, 6);
-let m1 = iSet.LOAD(T0, 1);
-let m2 = iSet.LOAD(T0, 2);
-let res;
-// T0 = 7, T1 = 5, T2 = 8
-code = [
-    iSet.LOAD(T0, 3),
-    iSet.LOAD(T1, 5),
-    iSet.ADD(T2, T0, T1),
-    iSet.ADD(T0, T0, 2),
-    iSet.ADD(T0, 6, 1)
-];
+// let rshandler = new RSHandler(256, arf);
+//let datamem = new DataMemory(64);
+// iSet = Test2InstructionSet;
+// let i1 = iSet.ADD(T0, 1);
+// let i2 = iSet.ADD(T1, T0);
+// let i3 = iSet.ADD(T1, 2);
+// let i4 = iSet.ADD(T2, 2);
+// let b1 = iSet.BRANCH_IF_ZERO(T0, 3);
+// let b2 = iSet.BRANCH_IF_ZERO(T1, 6);
+// let m1 = iSet.LOAD(T0, 1);
+// let m2 = iSet.LOAD(T0, 2);
+// let res;
+// // T0 = 7, T1 = 5, T2 = 8
+// code = [
+//     iSet.LOAD(T0, 3),
+//     iSet.LOAD(T1, 5),
+//     iSet.ADD(T2, T0, T1),
+//     iSet.ADD(T0, T0, 2),
+//     iSet.ADD(T0, 6, 1)
+// ];
 
-function MiniPipe() {
-    const pipe = this;
-    var fetch, decode, load, execute, store;
-    var pc = 0, result = {}, lastResult = {}, cycle;
+// function MiniPipe() {
+//     const pipe = this;
+//     var fetch, decode, load, execute, store;
+//     var pc = 0, result = {}, lastResult = {}, cycle;
 
-    this.run = function() {
-        pc = 0;
-        result = {};
-        lastResult = {};
-        fetch = decode = load = execute = store = undefined;
-        cycle = 0;
+//     this.run = function() {
+//         pc = 0;
+//         result = {};
+//         lastResult = {};
+//         fetch = decode = load = execute = store = undefined;
+//         cycle = 0;
 
-        // while ((!(fetch === decode === load === execute === store === null) && pc < code.length)) {
-        //     pipe.iteration();
-        //     console.log(cycle);
-        // }
-    }
+//         // while ((!(fetch === decode === load === execute === store === null) && pc < code.length)) {
+//         //     pipe.iteration();
+//         //     console.log(cycle);
+//         // }
+//     }
 
-    this.iteration = function() {
-        // Fetch
-        if (pc < code.length) {
-            fetch = code[pc++];
-            fetch.cycle = cycle;
-        }
-        else fetch = undefined;
+//     this.iteration = function() {
+//         // Fetch
+//         if (pc < code.length) {
+//             fetch = code[pc++];
+//             fetch.cycle = cycle;
+//         }
+//         else fetch = undefined;
 
-        // Decode
-        if (decode) {
-            rename(decode, arf);
-            rshandler.insert(decode);
-        }
+//         // Decode
+//         if (decode) {
+//             rename(decode, arf);
+//             rshandler.insert(decode);
+//         }
 
-        // Load
+//         // Load
 
-        // Execute
-        if (execute) {
-            execute.forEach(instruction => {
-                if (instruction.type === DATA_TYPES.ARITHMETIC) {
-                    instruction.ula = instruction.executethis();
-                }
-                instruction.executedCycles++;
-            });
-        }
+//         // Execute
+//         if (execute) {
+//             execute.forEach(instruction => {
+//                 if (instruction.type === DATA_TYPES.ARITHMETIC) {
+//                     instruction.ula = instruction.executethis();
+//                 }
+//                 instruction.executedCycles++;
+//             });
+//         }
 
-        // Write back
-        if (store) {
-            store.forEach(instruction => {
-                if (instruction.type === DATA_TYPES.DATA_TRANSFER) {
-                    instruction.executethis(datamem);
-                }
-                if (instruction.type === DATA_TYPES.ARITHMETIC) {
-                    instruction.params.dest.set(instruction.ula);
-                }
-                rshandler.wb(instruction);
-                log(instruction);
-            });
-        }
+//         // Write back
+//         if (store) {
+//             store.forEach(instruction => {
+//                 if (instruction.type === DATA_TYPES.DATA_TRANSFER) {
+//                     instruction.executethis(datamem);
+//                 }
+//                 if (instruction.type === DATA_TYPES.ARITHMETIC) {
+//                     instruction.params.dest.set(instruction.ula);
+//                 }
+//                 rshandler.wb(instruction);
+//                 log(instruction);
+//             });
+//         }
 
-        //console.log(fetch, decode, execute, store);
+//         //console.log(fetch, decode, execute, store);
 
-        //lastResult = result;
-        store = execute ? execute.filter(instruction => { return instruction.latency === instruction.executedCycles; }) : execute;
-        execute = rshandler.getExecutables();
-        //execute = load;
-        //load = decode;
-        decode = fetch;
-        fetch = undefined;
+//         //lastResult = result;
+//         store = execute ? execute.filter(instruction => { return instruction.latency === instruction.executedCycles; }) : execute;
+//         execute = rshandler.getExecutables();
+//         //execute = load;
+//         //load = decode;
+//         decode = fetch;
+//         fetch = undefined;
 
-        cycle++;
-    }
-}
+//         cycle++;
+//     }
+// }
 
-let pipe = new MiniPipe();
+// let pipe = new MiniPipe();
 //pipe.run();
 // res = checkRaW(i1, i2);
 // console.log(res);
