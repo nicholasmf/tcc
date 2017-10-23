@@ -1,6 +1,6 @@
 // Branch Target Buffer
 function BTB() {
-    this.cache = new associativeCache(256, 4);
+    this.cache = new associativeCache(8, 2);
     
     // target address if predict to be taken, undefined otherwise
     this.predict = function(instruction) {
@@ -16,7 +16,7 @@ function BTB() {
     // update entry on BTB
     this.update = function(instruction, taken) {
         let address = instruction.address;
-        let target = instruction.params.brachTo;
+        let target = instruction.params.branchTo;
         let entry = this.cache.search(address);
         if (entry) {
             let history = entry.history;

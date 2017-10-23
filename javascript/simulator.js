@@ -178,6 +178,7 @@ function Simulator() {
     }
 
     this.nextStep = function() {
+		console.log(sim.branchPredictor);
         sim.cicle();
     }
 
@@ -215,7 +216,7 @@ function Simulator() {
             instructionsList.appendChild(newItem);
         });
         if (sim.branchPredictor) 
-			sim.branchPredictor.render();
+			sim.branchPredictor.render ($("#cacheContainer"));
         sim.renderRegistersBank();
         sim.DataMemory.render();        
         

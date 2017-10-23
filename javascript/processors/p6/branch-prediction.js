@@ -31,10 +31,10 @@ function PatterHistoryTable(n) {
 // BTB for PPMX, PPro, P2, P3
 function AdaptivePredictorBTB() {
     const btb = this;
-    var size = 256;
-    var ways = 16;
-    var sets = 16;
-    var phtBits = 4;
+    var size = 8;
+    var ways = 2;
+    var sets = size/ways;
+    var phtBits = 3;
     this.cache = new associativeCache(size, ways);
 
     // target address if predict to be taken, undefined otherwise
