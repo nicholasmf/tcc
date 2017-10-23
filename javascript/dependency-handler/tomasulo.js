@@ -69,14 +69,14 @@ function RS(ins, vj, vk, qj, qk, a) {
     Qk = qk;
     A = a;
 
-     // Update
-     this.update = function(vj, vk, qj, qk, a) {
-         if (vj) Vj = vj;
-         if (vk) Vk = vk;
-         if (qj) Qj = qj;
-         if (qk) Qk = qk;
-         if (a) A = a;
-     }
+    // Update
+    this.update = function(vj, vk, qj, qk, a) {
+        if (vj) Vj = vj;
+        if (vk) Vk = vk;
+        if (qj) Qj = qj;
+        if (qk) Qk = qk;
+        if (a) A = a;
+    }
 
      // Remove
      this.remove = function() {
@@ -114,6 +114,13 @@ function RS(ins, vj, vk, qj, qk, a) {
 }
 
 // Reservation stations handler
+/**
+ * Public methods:
+ *      - insert
+ *      - wb
+ *      - getExecutables
+ */ 
+
 function RSHandler(size, arf) {
     const stations = this;
     var size = size;
@@ -198,29 +205,6 @@ function rename(instruction, arf) {
         instruction.params.dest = arf.update(dest);
     }
 
-}
-
-// Print source and dest name
-function log(instruction) {
-    let dest = isObject(instruction.params.dest) ? instruction.params.dest.name : instruction.params.dest;
-    let source = isObject(instruction.params.source) ? instruction.params.source.name : instruction.params.source;
-    let source1 = isObject(instruction.params.source1) ? instruction.params.source1.name : instruction.params.source1;
-    let source2 = isObject(instruction.params.source2) ? instruction.params.source2.name : instruction.params.source2;
-    let log = "";
-
-    if (dest) {
-        log += "d: " + dest + " ";
-    }
-    if (source) {
-        log += "s: " + source;
-    }
-    if (source1) {
-        log += "s1: " + source1 + " ";
-    }
-    if (source2) {
-        log += "s2: " + source2;
-    }
-    if (log) console.log(log);
 }
 
 let arf = new ARF();

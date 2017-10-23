@@ -170,47 +170,6 @@ function setCode() {
     
 // ];
 
-// Returns if two instructions are true dependent (RaW)
-function checkRaW(i1, i2) {
-    let i1dest = isObject(i1.params.dest) ? i1.params.dest : {};
-    let i2dest = isObject(i2.params.dest) ? i2.params.dest : {};
-    let i2source = isObject(i2.params.source) ? i2.params.source : {};
-
-    if (i2.params.type === DATA_TYPES.ARITHMETIC && i1dest === i2dest) {
-        return true;
-    }
-    if (i1dest === i2source) {
-        return true;
-    }
-    return false;
-}
-
-// Returns if two instructions has anti-dependence (WaR)
-function checkWaR(i1, i2) {
-    let i1dest = isObject(i1.params.dest) ? i1.params.dest : {};
-    let i2dest = isObject(i2.params.dest) ? i2.params.dest : {};
-    let i1source = isObject(i1.params.source) ? i1.params.source : {};
-
-    if (i1.params.type === DATA_TYPES.ARITHMETIC && i1dest === i2dest) {
-        return true;
-    }
-    if (i1source === i2dest) {
-        return true;
-    }
-    return false;
-}
-
-// Returns if two instructions has (WaW)
-function checkWaW(i1, i2) {
-    let i1dest = isObject(i1.params.dest) ? i1.params.dest : {};
-    let i2dest = isObject(i2.params.dest) ? i2.params.dest : {};
-
-    if (i1dest === i2dest) {
-        return true;
-    }
-    return false;
-}
-
 code = [
     iSet.LOADI(T0, 0),
     iSet.BRANCH_IF_ZERO(T0, 5),

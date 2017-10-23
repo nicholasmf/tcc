@@ -27,11 +27,14 @@
         <!-- Database handler -->
         <script type="text/javascript" src="./javascript/firebase_handler.js"></script>
 
+        <!-- General Purpose functions -->
+        <script type="text/javascript" src="./javascript/aux-functions.js"></script>
+
         <!-- Caches -->
         <script type="text/javascript" src="./javascript/caches/associative-cache.js"></script>
 
         <!-- OoO -->
-        <!-- <script type="text/javascript" src="./javascript/OoO/tomasulo.js"></script> -->
+        <!-- <script type="text/javascript" src="./javascript/dependency-handler/tomasulo.js"></script> -->
 		
 		<!-- Pipeline Steps -->
 		<script type="text/javascript" src="./javascript/pipeline-steps/base.js"></script>
@@ -75,20 +78,20 @@
                     <option value="test">Test Instructionset</option>
                     <option value="test2">Test2 Instructionset</option>                
                 </select>-->
-                <select class="form-control mr-sm-2" id="selectBP" onchange="setBP">
+                <select class="form-control mr-sm-2" id="selectBP" onchange="setBP()">
                     <option value="">-- Preditor de desvio --</option>
                     <option value="btb">P5 BTB</option>
                     <option value="apbtb">Predição adaptativa</option>
                 </select>
 
-                <select class="form-control mr-sm-2" id="selectPipe" onchange="setPipe">
+                <select class="form-control mr-sm-2" id="selectPipe" onchange="setPipe()">
                     <option value="">-- Pipeline --</option>
                     <option value="dummy" selected>Simples</option>
                     <option value="netburst" disabled>NetBurst</option>
                     <option value="p5" disabled>P5</option>
                 </select>
 
-                <select class="form-control mr-sm-2" id="selectDH" onchange="setDH">
+                <select class="form-control mr-sm-2" id="selectDH" onchange="setDH()">
                     <option value="">-- Dependências --</option>
                     <option value="ignore" selected>Ignorar</option>
                     <option value="stall" disabled>Esperar dependência</option>
