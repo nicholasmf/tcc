@@ -141,13 +141,13 @@ function setCode() {
             iSet.LOADI(T1, -4),
             iSet.DUMMY(),
             iSet.ADD(T1, 1),
-            iSet.BRANCH_IF_ZERO(T1, 9),
+            iSet.DUMMY(),            
+            iSet.BRANCH_IF_ZERO(T1, 11),
             iSet.BRANCH_IF_ZERO(T0, 6),
             iSet.LOADI(T0, 1),
             iSet.DUMMY(),
             iSet.DUMMY(),
             iSet.DUMMY(),
-       
        ];
     }
 }
@@ -176,14 +176,13 @@ code = [
     iSet.DUMMY(),
     iSet.DUMMY(),
     iSet.DUMMY(),
-    iSet.LOADI(T1, -4),
+    iSet.LOADI(T1, -1),
     iSet.DUMMY(),
     iSet.ADD(T1, 1),
-    iSet.BRANCH_IF_ZERO(T1, 9),
+    iSet.BRANCH_IF_ZERO(T1, 11),
     iSet.BRANCH_IF_ZERO(T0, 6),
     iSet.LOADI(T0, 1),
     iSet.DUMMY(),
     iSet.DUMMY(),
     iSet.DUMMY(),
-
 ];
