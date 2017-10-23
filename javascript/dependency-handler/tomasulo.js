@@ -116,9 +116,9 @@ function RS(ins, vj, vk, qj, qk, a) {
 // Reservation stations handler
 /**
  * Public methods:
- *      - insert
- *      - wb
- *      - getExecutables
+ *      - insert(instruction)
+ *      - wb(instruction)
+ *      - getExecutables()
  */ 
 
 function RSHandler(size, arf) {

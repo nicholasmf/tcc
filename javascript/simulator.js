@@ -178,7 +178,7 @@ function Simulator() {
     }
 
     this.nextStep = function() {
-		console.log(sim.branchPredictor);
+//		console.log(sim.branchPredictor);
         sim.cicle();
     }
 
@@ -191,12 +191,8 @@ function Simulator() {
             sim.branchPredictor = bp;
     }
 
-    this.setRename = function(rename) {
-        sim.rename = rename;
-    }
-
-    this.setoutOfOrder = function(OoO) {
-        sim.outOfOrder = OoO;
+    this.setDependencyHandler = function(dh) {
+        if (dh) { sim.dependencyHandler = dh; }
     }
 
     this.run = function(instructionSet, instructions, architecture) {
@@ -221,12 +217,12 @@ function Simulator() {
         sim.DataMemory.render();        
         
         // Execute
-       console.log(sim.architecture.name);
+//       console.log(sim.architecture.name);
 
         sim.cicle = function() {   
 			
 			//sim.architecture.p5Arq(instructions, execution);
-			sim.architecture.pipeLoop(instructions, execution, sim.branchPredictor);
+			sim.architecture.pipeLoop(instructions, execution, sim.branchPredictor, sim.dependencyHandler);
 			
 			//console.log("gDI: " + sim.architecture.getDecodeInstruction().name);
 			//console.log("pc: " + pc + " LR: " + sim.fillNoop);            

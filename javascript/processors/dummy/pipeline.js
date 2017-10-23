@@ -8,22 +8,22 @@ function fetchExecution(instructions, pc, cycle, branchPredictor) {
 	if(fetchI && fetchI.type === DATA_TYPES.CONTROL)
 	{//preciso executar se eu tiver um preditor ativo e se a instrucao for de branch
 		branchPredictorResult = branchPredictor.predict(fetchI);//branchPredictorResult recebe endereco de previsao se houver
-		console.log("predictor result is: " + branchPredictorResult);
-	}
+//		console.log("predictor result is: " + branchPredictorResult);
+        fetchI.btbResult = branchPredictorResult !== undefined;
+    }
 	else
 	{
-		console.log("predictor result is: no jump");
+//		console.log("predictor result is: no jump");
 		branchPredictorResult = undefined;
-	}
-	if(fetchI)
-	{
-		fetchI.btbResult = branchPredictorResult !== undefined;
 	}
 	return branchPredictorResult;
 }
 
-function decodeExecution() {
-
+function decodeExecution(dh) {
+    var instruction = this.getStepInstruction();
+    if (instruction && dh) {
+        dh.insert(instruction);
+    }
 }
 
 function loadExecution() {
@@ -56,7 +56,7 @@ function executeExecution(branchPredictor) {
 	}
 }
 
-function storeExecution(dataMemory) {
+function storeExecution(dataMemory, dh) {
 	
 	let instruction = this.getStepInstruction();
 	
@@ -68,7 +68,10 @@ function storeExecution(dataMemory) {
 	if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER) 
 	{
 		instruction.executethis(dataMemory);
-	}
+    }
+    if (instruction && dh) {
+        dh.wb(instruction);
+    }
 }
 
 function DummyPipe() {
@@ -91,37 +94,46 @@ function DummyPipe() {
     }
 	
 
-	this.pipeLoop = function(instructions, loopControl, branchPredictor)
+	this.pipeLoop = function(instructions, loopControl, branchPredictor, dependencyHandler)
 	{
-		console.log("/////////////////////////////////////////");
-				
-		this.store.setStepInstruction( executeI );//avanca as instrucoes nas etapas
+//		console.log("/////////////////////////////////////////");
+
+        // let nextLoadIns = dependencyHandler && decodeI ? (dependencyHandler.getExecutables()[0] || new Instruction("NoOp")) : decodeI;
+        // let stallDecode = nextLoadIns && nextLoadIns.name === "NoOp" && decodeI;
+        
+        this.store.setStepInstruction( executeI );
 		this.execute.setStepInstruction( loadI );
 		this.load.setStepInstruction( decodeI );
 		this.decode.setStepInstruction( fetchI );
 		
-		/////////////////// execucao das etapas /////////////////////////////
+        /////////////////// execucao das etapas /////////////////////////////
         var predictionAddr = this.fetch.execution(instructions, pc, cycle, branchPredictor);
         this.fetch.render(pc);
-		cycle++;
-		
+        cycle++;
+        // if (stallDecode) { SimplePipe.insertNoOp("load"); }
+        // else {
+        //     this.fetch.execution(instructions, pc, cycle, branchPredictor)
+        //     this.fetch.render(pc);
+		//     cycle++;
+        // }
+
 		fetchI = this.fetch.getStepInstruction();
 		decodeI = this.decode.getStepInstruction();
 		loadI = this.load.getStepInstruction();
 		executeI = this.execute.getStepInstruction();
-		storeI = this.store.getStepInstruction();
-		
-		
-		
+		storeI = this.store.getStepInstruction();		
+        
+//        console.log(fetchI, decodeI, loadI, executeI, storeI);
+
 		//executo fetch, pois ele apenas pega a proxima instrucao da memoria
 		if(decodeI)
 		{
-			if(decodeI.cycle <= flushControl + 3)
+			if(decodeI.cycle <= flushControl    + 3)
 			{}
 			else
 			{
-				this.decode.execution();
-				console.log("executing decode");
+				this.decode.execution(dependencyHandler);
+//				console.log("executing decode");
 			}
 			this.decode.render("fetch", containerPipeline);
 		}
@@ -134,7 +146,7 @@ function DummyPipe() {
 			else
 			{
 				this.load.execution(pc);
-				console.log("executing load");
+//				console.log("executing load");
 			}
 			this.load.render("decode", containerPipeline);
 		}
@@ -146,7 +158,7 @@ function DummyPipe() {
 			else
 			{
 				this.execute.execution(branchPredictor);//execution returns retorna o destino do branch tomado, -1 se nao houverem branchs
-				console.log("executing execute");
+//				console.log("executing execute");
 			}
 			this.execute.render("load", containerPipeline);
 		}
@@ -157,8 +169,8 @@ function DummyPipe() {
 			{}
 			else
 			{
-				this.store.execution(SimplePipe.dataMemory);
-				console.log("executing store");
+				this.store.execution(SimplePipe.dataMemory, dependencyHandler);
+//				console.log("executing store");
 			}
 			this.store.render("execute", containerPipeline);
 		}	
@@ -167,11 +179,11 @@ function DummyPipe() {
 		
 		/////////////////// fim da execucao das etapas /////////////////////////////
 		
-		console.log(this.fetch.getStepInstruction());
-		console.log(this.decode.getStepInstruction());
-		console.log(this.load.getStepInstruction());
-		console.log(this.execute.getStepInstruction());
-		console.log(this.store.getStepInstruction());
+		// console.log(this.fetch.getStepInstruction());
+		// console.log(this.decode.getStepInstruction());
+		// console.log(this.load.getStepInstruction());
+		// console.log(this.execute.getStepInstruction());
+		// console.log(this.store.getStepInstruction());
 		//debugger;
 		
 		//////pipeline flushing control //////////////////////
@@ -190,13 +202,13 @@ function DummyPipe() {
 			stopFlushControl = -4;
 		}
 		//////end of pipeline flushing control //////////////////////
-		console.log("flushControl: " + flushControl + " cycle: " + cycle + " stopFlushControl: " + stopFlushControl);
+//		console.log("flushControl: " + flushControl + " cycle: " + cycle + " stopFlushControl: " + stopFlushControl);
 		//////branch & sequential pc control //////////////////////
 		if(executeI && executeI.type === DATA_TYPES.CONTROL && (flushControl == -4 || executeI.cycle <= flushControl + 3) )
 		{
-			console.log("was: " + executeI.params.branchResult + " predicted: " + executeI.btbResult);
+//			console.log("was: " + executeI.params.branchResult + " predicted: " + executeI.btbResult);
 			if(executeI.params.branchResult === executeI.btbResult)//eu acertei, mas nao sei pq
-			{//se minha especulacao do branch agora no execute, foi errada, devo dar flush e voltar o pc de onde ele veio
+            {//se minha especulacao do branch agora no execute, foi errada, devo dar flush e voltar o pc de onde ele veio
 				if(predictionAddr)
 				{
 					pc = predictionAddr;
@@ -220,15 +232,22 @@ function DummyPipe() {
 		}
 		else
 		{
-			pc++;
+            if(predictionAddr)
+            {
+                pc = predictionAddr;
+            }
+            else
+            {
+                pc++;
+            }
 		}
 		//////end of branch & sequential pc control //////////////////////
 		
-		console.log("pc: " + pc);
+//		console.log("pc: " + pc);
 		
 		if (!(fetchI || executeI || loadI || decodeI || storeI))
 		{
-			console.log("no u");
+//			console.log("no u");
 			clearInterval(loopControl);
 		}	
 	}
@@ -332,5 +351,10 @@ function DummyPipe() {
                 }, 200);
             }, delay);
         }
-    }	
+    }
+
+    this.insertNoOp = function(step) {
+        let noop = $(`<div class='pipeline-item ${step} background-danger'>NoOp</div>`);
+        containerPipeline.append(noop);
+    }
 }

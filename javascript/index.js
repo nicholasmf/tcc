@@ -17,6 +17,7 @@ function start() {
     //var architecture = new P5Arq();
     setPipe();
     setTimeInterval();
+    setBP();
     if(code)
 	{
 		code.map(function(item, i) {
@@ -106,7 +107,8 @@ function setTimeInterval() {
 function setBP() {
     var val = $("#selectBP").val();
     var bp;
-    if (val === "btb") bp = new BTB();
+    if (!val) { bp = new AlwaysFalsePredictor(); }
+    else if (val === "btb") bp = new BTB();
     else if (val === "apbtb") bp = new AdaptivePredictorBTB();
     simulator.setBP(bp);
 }
@@ -121,11 +123,10 @@ function setPipe() {
 function setDH() {
     var val = $("#selectDH").val();
     if (val === "ignore");
-    if (val === "stall");
+    if (val === "stall") { simulator.setDependencyHandler(new StallHandler()); }
     if (val === "OoO");
     if (val === "OoOrenaming") {
-        simulator.setRename(true);
-        simulator.setOoO(true);
+        
     }
 }
 

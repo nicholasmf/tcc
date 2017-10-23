@@ -35,6 +35,7 @@
 
         <!-- OoO -->
         <!-- <script type="text/javascript" src="./javascript/dependency-handler/tomasulo.js"></script> -->
+        <script type="text/javascript" src="./javascript/dependency-handler/ignore.js"></script>
 		
 		<!-- Pipeline Steps -->
 		<script type="text/javascript" src="./javascript/pipeline-steps/base.js"></script>
@@ -45,10 +46,9 @@
 
         <!-- Branch Predictors -->
         <script type="text/javascript" src="./javascript/processors/p1/branch-prediction.js"></script>
-		<script type="text/javascript" src="./javascript/processors/p6/branch-prediction.js"></script>
-		
-        <!-- <script type="text/javascript" src="./javascript/processors/p6/branch-prediction.js"></script>        
-		
+        <script type="text/javascript" src="./javascript/processors/p6/branch-prediction.js"></script>
+        <script type="text/javascript" src="./javascript/processors/dummy/branch-prediction.js"></script>
+				
 		<!-- P5 Pairing Verification -->
 		<script type="text/javascript" src="./javascript/processors/p1/pipelineissuing.js"></script>
 		
@@ -95,7 +95,7 @@
                 <select class="form-control mr-sm-2" id="selectDH" onchange="setDH()">
                     <option value="">-- Dependências --</option>
                     <option value="ignore" selected>Ignorar</option>
-                    <option value="stall" disabled>Esperar dependência</option>
+                    <option value="stall">Esperar dependência</option>
                     <option value="OoO" disabled>Execução fora de ordem</option>
                     <option value="OoOrenaming">Execução fora de ordem com renomeamento</option>
                 </select>
