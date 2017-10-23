@@ -18,10 +18,7 @@ function Instruction (name, type, MicroInstruction, params, executableInV, execu
     this.executethis = executethis;
     this.latency = 1;
     this.executedCycles = 0;
-    if (params) {
-        this.branchResult = params.branchResult;//veracidade do jump
-        this.branchTo = params.branchTo;//endereco do jump
-    }
+
     if(type === DATA_TYPES.CONTROL)
     {//se a instrucao for do tipo controle, ela tera um metodo especial que retorna o endereco de destino
         var instruction = this;
@@ -29,6 +26,23 @@ function Instruction (name, type, MicroInstruction, params, executableInV, execu
         {
             return instruction.params.branchTo;
         }
+    }
+
+    // returns a new object with the same properties
+    this.copy = function() {
+        var newIns = new Instruction();
+        for (var prop in this) {
+            if (prop === "params") {
+                newIns.params = {};
+                for (let param in this.params) {
+                    newIns.params[param] = this.params[param];
+                }
+            }
+            else {
+                newIns[prop] = this[prop];
+            }
+        }
+        return newIns;
     }
 }
 
