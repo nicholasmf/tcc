@@ -178,7 +178,7 @@ code = [
             iSet.DUMMY(),
             iSet.DUMMY(),
             iSet.DUMMY(),
-            iSet.LOADI(T1, -4),
+            iSet.LOADI(T1, -1),
             iSet.DUMMY(),
             iSet.ADD(T1, 1),
             iSet.DUMMY(),            

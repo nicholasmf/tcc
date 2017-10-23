@@ -98,24 +98,26 @@ function DummyPipe() {
 	{
 //		console.log("/////////////////////////////////////////");
 
-        // let nextLoadIns = dependencyHandler && decodeI ? (dependencyHandler.getExecutables()[0] || new Instruction("NoOp")) : decodeI;
-        // let stallDecode = nextLoadIns && nextLoadIns.name === "NoOp" && decodeI;
+        let dhRet = dependencyHandler ? dependencyHandler.getExecutables()[0] : null;
+        let nextLoadIns = dependencyHandler && decodeI ? ( dhRet === undefined ? new Instruction("NoOp") : dhRet === null ? decodeI : dhRet) : decodeI;
+        let stallDecode = nextLoadIns && nextLoadIns.name === "NoOp" && decodeI;
         
         this.store.setStepInstruction( executeI );
 		this.execute.setStepInstruction( loadI );
-		this.load.setStepInstruction( decodeI );
-		this.decode.setStepInstruction( fetchI );
+		this.load.setStepInstruction( nextLoadIns );
+		if (!stallDecode) this.decode.setStepInstruction( fetchI );
 		
         /////////////////// execucao das etapas /////////////////////////////
-        var predictionAddr = this.fetch.execution(instructions, pc, cycle, branchPredictor);
-        this.fetch.render(pc);
-        cycle++;
-        // if (stallDecode) { SimplePipe.insertNoOp("load"); }
-        // else {
-        //     this.fetch.execution(instructions, pc, cycle, branchPredictor)
-        //     this.fetch.render(pc);
-		//     cycle++;
-        // }
+        // var predictionAddr = this.fetch.execution(instructions, pc, cycle, branchPredictor);
+        // this.fetch.render(pc);
+        // cycle++;
+        var predictionAddr;
+        if (stallDecode) { SimplePipe.insertNoOp("load"); }
+        else {
+            predictionAddr = this.fetch.execution(instructions, pc, cycle, branchPredictor)
+            this.fetch.render(pc);
+		    cycle++;
+        }
 
 		fetchI = this.fetch.getStepInstruction();
 		decodeI = this.decode.getStepInstruction();
@@ -123,17 +125,17 @@ function DummyPipe() {
 		executeI = this.execute.getStepInstruction();
 		storeI = this.store.getStepInstruction();		
         
-//        console.log(fetchI, decodeI, loadI, executeI, storeI);
+       console.log(fetchI, decodeI, loadI, executeI, storeI);
 
-		//executo fetch, pois ele apenas pega a proxima instrucao da memoria
-		if(decodeI)
+        //executo fetch, pois ele apenas pega a proxima instrucao da memoria
+		if(decodeI && !stallDecode)
 		{
-			if(decodeI.cycle <= flushControl    + 3)
+			if(decodeI.cycle <= flushControl + 3)
 			{}
 			else
 			{
+                //				console.log("executing decode");
 				this.decode.execution(dependencyHandler);
-//				console.log("executing decode");
 			}
 			this.decode.render("fetch", containerPipeline);
 		}
@@ -148,7 +150,7 @@ function DummyPipe() {
 				this.load.execution(pc);
 //				console.log("executing load");
 			}
-			this.load.render("decode", containerPipeline);
+			if (!stallDecode) this.load.render("decode", containerPipeline);
 		}
 		
 		if(executeI)
@@ -166,7 +168,9 @@ function DummyPipe() {
 		if(storeI)
 		{
 			if(storeI.cycle <= flushControl + 3 && this.store.getStepInstruction().cycle != flushControl)
-			{}
+			{
+                if (dependencyHandler) dependencyHandler.wb(storeI);
+            }
 			else
 			{
 				this.store.execution(SimplePipe.dataMemory, dependencyHandler);
@@ -215,7 +219,7 @@ function DummyPipe() {
 				}
 				else
 				{
-					pc++;
+					if (!stallDecode) pc++;
 				}
 			}
 			else
@@ -238,7 +242,7 @@ function DummyPipe() {
             }
             else
             {
-                pc++;
+                if (!stallDecode) pc++;
             }
 		}
 		//////end of branch & sequential pc control //////////////////////
