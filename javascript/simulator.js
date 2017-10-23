@@ -219,7 +219,8 @@ function Simulator() {
             newItem.className = 'list-group-item';
             instructionsList.appendChild(newItem);
         });
-        
+        if (sim.branchPredictor) 
+			sim.branchPredictor.render();
         sim.renderRegistersBank();
         sim.DataMemory.render();        
         
@@ -229,7 +230,7 @@ function Simulator() {
         sim.cicle = function() {   
 			
 			//sim.architecture.p5Arq(instructions, execution);
-			sim.architecture.pipeLoop(instructions, execution);
+			sim.architecture.pipeLoop(instructions, execution, sim.branchPredictor);
 			
 			//console.log("gDI: " + sim.architecture.getDecodeInstruction().name);
 			//console.log("pc: " + pc + " LR: " + sim.fillNoop);            

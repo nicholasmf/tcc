@@ -1,10 +1,24 @@
-function fetchExecution(instructions, pc, cycle) {
+function fetchExecution(instructions, pc, cycle, branchPredictor) {
 	this.setStepInstruction(instructions[pc]);
 	this.setStepInstructionCycle(cycle);
+	
+	var btbResult;
+	fetchI = this.getStepInstruction();
+	
+	if(fetchI.type === DATA_TYPES.CONTROL)
+	{//preciso executar se eu tiver um preditor ativo e se a instrucao for de branch
+		branchPredictorResult = branchPredictor.predict(fetchI);//branchPredictorResult recebe endereco de previsao se houver
+	}
+	else
+	{
+		branchPredictorResult = undefined;
+	}
+	fetchI.btbResult = branchPredictorResult !== undefined;
+	return branchPredictorResult;
 }
 
 function decodeExecution() {
-	
+
 }
 
 function loadExecution() {
@@ -27,10 +41,9 @@ function executeExecution(pc) {
 			instruction.executethis();
 		}
 		//console.log(instruction.params.branchResult);
-		if (instruction.params.branchResult && instruction.params.branchTo !== pc + 1)
+		if (instruction.params.branchResult)
 		{
 			branchDestination = instruction.params.branchTo;
-			flushCycleControl = instruction.cycle
 			//comeco a dar flush se a previsao foi errada
 			//console.log("gone flushing");
 		}
@@ -73,24 +86,31 @@ function DummyPipe() {
     }
 	
 
-	this.pipeLoop = function(instructions, loopControl)
+	this.pipeLoop = function(instructions, loopControl, branchPredictor)
 	{
 		executionReturns = -1;
 		
-		this.store.setStepInstruction( this.execute.getStepInstruction() );//avanca as instrucoes nas etapas
-		this.execute.setStepInstruction( this.load.getStepInstruction() );
-		this.load.setStepInstruction( this.decode.getStepInstruction() );
-		this.decode.setStepInstruction( this.fetch.getStepInstruction() );
+		
+		var fetchI = this.fetch.getStepInstruction();
+		var decodeI = this.decode.getStepInstruction();
+		var loadI = this.load.getStepInstruction();
+		var executeI = this.execute.getStepInstruction();
+		var storeI = this.store.getStepInstruction();
+		
+		this.store.setStepInstruction( executeI );//avanca as instrucoes nas etapas
+		this.execute.setStepInstruction( loadI );
+		this.load.setStepInstruction( decodeI );
+		this.decode.setStepInstruction( fetchI );
 		
 		/////////////////// execucao das etapas /////////////////////////////
-        this.fetch.execution(instructions, pc, cycle);
+        var predictionAddr = this.fetch.execution(instructions, pc, cycle);
         this.fetch.render(pc);
 		cycle++;
 
 		//executo fetch, pois ele apenas pega a proxima instrucao da memoria
-		if(this.decode.getStepInstruction())
+		if(decodeI)
 		{
-			if(this.decode.getStepInstruction().cycle <= flushControl + 3)
+			if(decodeI.cycle <= flushControl + 3)
 			{}
 			else
 			{
@@ -101,9 +121,9 @@ function DummyPipe() {
 		}
 		
 		
-		if(this.load.getStepInstruction())
+		if(loadI)
 		{
-			if(this.load.getStepInstruction().cycle <= flushControl + 3)
+			if(loadI.cycle <= flushControl + 3)
 			{}
 			else
 			{
@@ -113,9 +133,9 @@ function DummyPipe() {
 			this.load.render("decode", containerPipeline);
 		}
 		
-		if(this.execute.getStepInstruction())
+		if(executeI)
 		{
-			if(this.execute.getStepInstruction().cycle <= flushControl + 3)
+			if(executeI.cycle <= flushControl + 3)
 			{}
 			else
 			{
@@ -125,9 +145,9 @@ function DummyPipe() {
 			this.execute.render("load", containerPipeline);
 		}
 		
-		if(this.store.getStepInstruction())
+		if(storeI)
 		{
-			if(this.store.getStepInstruction().cycle <= flushControl + 3 && this.store.getStepInstruction().cycle != flushControl)
+			if(storeI.cycle <= flushControl + 3 && this.store.getStepInstruction().cycle != flushControl)
 			{}
 			else
 			{
@@ -150,21 +170,42 @@ function DummyPipe() {
 		debugger;
 		*/
 		//////pipeline flushing control //////////////////////
-		if(executionReturns != -1)
-		{
-			flushControl = this.execute.getStepInstruction().cycle;//flush control recebe o ciclo da instrucao de branch q causou o flush
-		}
-		if(this.store.getStepInstruction())
-		{
-			if(cycle === flushControl + 3)
-				flushControl = -4;
-		}
+		if(executeI && executeI.type === DATA_TYPES.CONTROL)//deve existir uma instrucao em execute
+		{//se houver um branch que errei a previsao, devo dar flush
+			if(executeI.params.branchResult !== executeI.btbResult)//e esses enderecos nao forem iguais, errei munha previsao
+			{
+				flushControl = executeI.cycle;//flush control recebe o ciclo da instrucao de branch q causou o flush
+			}
+		}		
+		if(cycle === flushControl + 3)//passaram-se 3 ciclos desde o inicio do flush, posso parar
+			flushControl = -4;
 		//////end of pipeline flushing control //////////////////////
 		
 		//////branch & sequential pc control //////////////////////
-		if(executionReturns != -1)
+		if(executeI.type === DATA_TYPES.CONTROL)
 		{
-			pc = executionReturns;
+			if(executeI.params.branchResult === executeI.btbResult)//eu acertei, mas nao sei pq
+			{//se minha especulacao do branch agora no execute, foi errada, devo dar flush e voltar o pc de onde ele veio
+				if(predictionAddr)
+				{
+					pc = predictionAddr;
+				}
+				else
+				{
+					pc++;
+				}
+			}
+			else
+			{//eu errei
+				if(executeI.params.branchResult)//se eu errei pq houve pulo, previ q nao
+				{//pula o pc para a instrucao alvo
+					pc = executeI.getTargetAddr();
+				}
+				else
+				{//senao pula o pc para + 1
+					pc = executeI.address + 1;
+				}
+			}
 		}
 		else
 		{
@@ -172,7 +213,7 @@ function DummyPipe() {
 		}
 		//////end of branch & sequential pc control //////////////////////
 		
-		if (!(this.fetch.getStepInstruction() || this.execute.getStepInstruction() || this.load.getStepInstruction() || this.decode.getStepInstruction() || this.store.getStepInstruction()))
+		if (!(fetchI || executeI || loadI || decodeI || storeI))
 		{
 			console.log("no u");
 			clearInterval(loopControl);
