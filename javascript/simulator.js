@@ -9,11 +9,6 @@
  * retirement
  */
 
- // check if a var is an object
-function isObject(elem) {
-    return (elem !== null && typeof elem === 'object');
-}
-
 function Register(name, index) {
     const register = this;
     this.value = 0;

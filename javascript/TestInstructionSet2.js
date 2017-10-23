@@ -1,15 +1,4 @@
 var Test2InstructionSet = new InstructionSet();
-function getValue(elem) //verifica se o elemento eh um, objeto ou outra coisa
-{
-    if (elem !== null && typeof elem === 'object')
-    {
-        return elem.get();
-    }
-    else
-    {
-        return elem;
-    }
-}
 
 Test2InstructionSet.ADD = function (dest, source1, source2)
 {
