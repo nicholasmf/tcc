@@ -117,15 +117,15 @@
 }
 
 /*************************** Registers bank ***************/
-#registersContainer {
-    height: 180px;
+#registersContainer, #tempRegistersContainer {
+    height: 100px;
     overflow-y: auto;
     overflow-x: hidden;
     padding-left: 15px;
     padding-right: 15px;
 }
 
-#registersContainer .col-xs-1 {
+#registersContainer .col-xs-1, #tempRegistersContainer .col-xs-1 {
     padding-left: 3px;
     padding-right: 3px;
 }

@@ -11,6 +11,8 @@ function ARF() {
     this.update = function(register) {
         let i = register.index;
         let tempI = tempArray[tempArrayPos++];
+        tempI.pointedName = register.name;
+        tempI.set(register.get());
         if (tempArrayPos === tempArraySize) tempArrayPos = 0;
         memory[i] = tempI;
         return tempI;
@@ -29,6 +31,7 @@ function ARF() {
             if (item === register) index = i; 
         });
         if (index > -1) {
+            memory[index].pointedName = undefined;
             memory[index] = undefined;
             return regArray[index];
         }

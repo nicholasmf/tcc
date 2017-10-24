@@ -160,6 +160,7 @@ function setCode() {
             iSet.STORE(5, 5),
             iSet.LOAD(T0, 3),
             iSet.LOAD(T1, 5),
+            iSet.MUL(T0, 4, 5),
             iSet.ADD(T2, T0, T1),
             iSet.ADD(T0, T0, 2),
             iSet.ADD(T0, 6, 1)
