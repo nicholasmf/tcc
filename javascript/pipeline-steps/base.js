@@ -29,9 +29,21 @@ function PipelineStep(stepName, stepExecution, params) {
 			instruction.cycle = cycle;
 	}
 
+	this.setBranchAlreadyPredicted = function(predicted)
+	{
+		if(instruction)
+			instruction.AlreadyPredicted = predicted;
+	}
+	
 	this.getStepName = function()
 	{
 		return name;
+	}
+	
+	this.getBranchAlreadyPredicted = function(instruction)
+	{
+
+		return instruction.AlreadyPredicted;
 	}
 	
 	
