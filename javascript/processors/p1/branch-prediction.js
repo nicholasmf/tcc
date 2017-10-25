@@ -3,8 +3,8 @@ function BTB() {
     this.cache = new associativeCache(8, 2);
     
     // target address if predict to be taken, undefined otherwise
-    this.predict = function(instruction) {
-        let entry = this.cache.search(instruction.address);
+    this.predict = function(address) {
+        let entry = this.cache.search(address);
         if (entry && entry.history > 1) {
             return entry.value;
         }
@@ -14,9 +14,7 @@ function BTB() {
     }
 
     // update entry on BTB
-    this.update = function(instruction, taken) {
-        let address = instruction.address;
-        let target = instruction.params.branchTo;
+    this.update = function(address, target, taken) {
         let entry = this.cache.search(address);
         if (entry) {
             let history = entry.history;
