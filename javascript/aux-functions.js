@@ -3,6 +3,11 @@ function isObject(elem) {
     return (elem !== null && elem !== undefined && typeof elem === 'object');
 }
 
+// Check if var is not null and not undefined
+function isNumber(item) {
+    return (!isNaN(item) && item !== null);
+}
+
 // Returns value of elem - if elem is Register, calls get method; if elem is number returns itself
 function getValue(elem) 
 {

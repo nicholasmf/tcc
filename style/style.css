@@ -82,8 +82,16 @@
     left: 50%;
 }
 
+.pipeline.dummy .load {
+    left: 70%;
+}
+
 .pipeline-item.execute {
     left: 70%;
+}
+
+.pipeline.dummy .execute {
+    left: 50%;
 }
 
 .pipeline-item.store {
