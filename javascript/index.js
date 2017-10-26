@@ -117,7 +117,7 @@ function setPipe() {
     var val = $("#selectPipe").val();
     if (val === "dummy") pipe = new DummyPipe();
     if (val === "netburst") pipe = new NetburstPipe();
-    if (val === "p5") pipe = new P5Arq();
+    if (val === "p5") pipe = new P5Pipe();
 }
 
 function setDH() {

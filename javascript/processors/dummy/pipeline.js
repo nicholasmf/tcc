@@ -77,6 +77,14 @@ function DummyPipe() {
 	
 	const SimplePipe = this;
 	
+	
+    this.fetch = new PipelineStep("fetch", fetchExecution);
+	this.decode = new PipelineStep("decode", decodeExecution);
+	this.load = new PipelineStep("load", loadExecution);
+	this.execute = new PipelineStep("execute", executeExecution);
+    this.store = new PipelineStep("store", storeExecution);
+	
+	
 	var startedFlushingThisCycle;
 	var pc = 0;
 	var cycle = 0;
@@ -283,11 +291,6 @@ function DummyPipe() {
 	
 	
 	////////////////end of class declaration ///////////////////////////////////////////////////////////////
-    this.fetch = new PipelineStep("fetch", fetchExecution);
-	this.decode = new PipelineStep("decode", decodeExecution);
-	this.load = new PipelineStep("load", loadExecution);
-	this.execute = new PipelineStep("execute", executeExecution);
-    this.store = new PipelineStep("store", storeExecution);
     
     // Overwrite fetch render
     this.fetch.render = function(pc) {
