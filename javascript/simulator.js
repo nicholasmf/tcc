@@ -81,7 +81,7 @@ function DataMemory(size) {
         let col = table.find('td').eq(address);
         col.text(value);
 
-        if (!noAnimation) { return; }
+        if (noAnimation) { return; }
         table.animate({
             scrollTop: 0
         }, 200);
