@@ -34,7 +34,7 @@
 }
 
 .pipeline-item { /*eh o quadradinho, caracteristicas do formato, sombra (td menos cor e posicao; animacao... vai td aqui) */
-    top: 52px;
+    top: 20px;
     width: 42px;
     height: 42px;
     border-radius: 5px;

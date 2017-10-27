@@ -39,11 +39,13 @@
         <script type="text/javascript" src="./javascript/dependency-handler/scoreboarding.js"></script>
 		
 		<!-- Pipeline Steps -->
-		<script type="text/javascript" src="./javascript/pipeline-steps/base.js"></script>
+        <script type="text/javascript" src="./javascript/pipeline-steps/base.js"></script>
+        <script type="text/javascript" src="./javascript/pipeline-steps/p6base.js"></script>
 		
         <!-- Pipelines -->
         <script type="text/javascript" src="./javascript/processors/p1/pipeline.js"></script>
-		<script type="text/javascript" src="./javascript/processors/dummy/pipeline.js"></script>
+        <script type="text/javascript" src="./javascript/processors/dummy/pipeline.js"></script>
+        <script type="text/javascript" src="./javascript/processors/p6/p6pipe.js"></script>
 
         <!-- Branch Predictors -->
         <script type="text/javascript" src="./javascript/processors/p1/branch-prediction.js"></script>
@@ -82,15 +84,15 @@
                 </select>-->
                 <select class="form-control mr-sm-2" id="selectBP" onchange="setBP()">
                     <option value="">-- Preditor de desvio --</option>
-                    <option value="btb">P5 BTB</option>
+                    <option value="btb" selected>P5 BTB</option>
                     <option value="apbtb">Predição adaptativa</option>
                 </select>
 
                 <select class="form-control mr-sm-2" id="selectPipe" onchange="setPipe()">
                     <option value="">-- Pipeline --</option>
-                    <option value="dummy" selected>Simples</option>
-                    <option value="netburst" disabled>NetBurst</option>
-                    <option value="p5">P5</option>
+                    <option value="dummy" >Simples</option>
+                    <option value="p5" selected>P5</option>
+                    <option value="p6" >P6</option>
                 </select>
 
                 <select class="form-control mr-sm-2" id="selectDH" onchange="setDH()">
@@ -109,9 +111,9 @@
                 </select>
 
                 <select class="form-control mr-sm-2" id="selectCode" onchange="setCode()">
-                    <option value="">-- Codigo de programa</option>
-                    <option value="code1" selected>Programa 1</option>
-                    <option value="code2">Programa 2</option>
+                    <option value="">-- Codigo de programa --</option>
+                    <option value="code1" selected>Desvio</option>
+                    <option value="code2">Dados</option>
                 </select>
 
                 <input class="btn btn-primary my-sm-2" type="button" value="Start" onclick="start()"/>

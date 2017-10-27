@@ -1,6 +1,7 @@
 function P5Pipe(htmlClass) {
     
 	const pipeSim = this;
+	this.fillNoop = 0;
 	
 	this.name = "P5";
 	
@@ -57,8 +58,9 @@ function P5Pipe(htmlClass) {
 	*/
 	
 	//pipeName eh so para funs de debug
-	this.p5cycle = function(BTB, instructions, pc, execution, fillNoop, substituteInstruction, pipeDo, inBuffer, cycle, pipeName) {
-		
+	this.p5cycle = function(BTB, instructions, pc, execution, fillNoop, substituteInstruction, pipeDo, inBuffer, cycle, pipeName) {	
+
+		pipeSim.fillNoop = fillNoop;
 		correctlyPredictedYes = false;
 				
 		if(pipeDo.store)
@@ -171,13 +173,13 @@ function P5Pipe(htmlClass) {
 		if(pipeDo.decode)
 		{
 			console.log("executing " + pipeName + "decode");
-			pipeSim.decode(substituteInstruction);
+			pipeSim.decode(substituteInstruction, decodeI);
 		}
 			
 		if(pipeDo.load)
 		{
 			console.log("executing " + pipeName + "load");
-			pipeSim.load(substituteInstruction);
+			pipeSim.load(substituteInstruction, loadI);
 		}
 			
 		if(pipeDo.store)
@@ -212,7 +214,7 @@ function P5Pipe(htmlClass) {
 		//console.log(executeI, result, pipeSim.fillNoop);
 
 		if(executeI && executeI.type === DATA_TYPES.CONTROL){
-			pipeSim.BTB.update(executeI.address, executeI.params.branchTo, executeI.params.branchResult);
+			BTB.update(executeI.address, executeI.params.branchTo, executeI.params.branchResult);
 			//console.log(executeI.address);
 		}
 		
@@ -251,8 +253,8 @@ function P5Pipe(htmlClass) {
         // }
         // else 
         if (pc > -1) {
-            var instruction = instructions[pc];
-            var instructionElem = $("<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>");
+            var instruction = instructions[pc].copy();
+            var instructionElem = $("<div id='entry-"+globalPipeInOrderEntry +"' class='pipeline-item background-info fetch'>" + instruction.name + "</div>");
                                     //<div class='formato cor posicao'></div>
             //var elem = instructionList.children(":eq(0)");
             //elem.addClass("out");
@@ -265,8 +267,8 @@ function P5Pipe(htmlClass) {
                 //elem.detach();
                 containerPipeline.append(instructionElem);
             }, 60);//talvez nao precise de delay
-
-            return instructions[pc].copy();//retorna a instrucao na posicao pc
+			instruction.inOrder = globalPipeInOrderEntry++;
+            return instruction;//retorna a instrucao na posicao pc
         }
         else { 
             return null;
@@ -274,40 +276,57 @@ function P5Pipe(htmlClass) {
     }
 
     /***************** Decode *********************/
-    this.decode = function(substituteInstruction) {//so parte grafica, por enquanto?
-        var count =  containerPipeline.children(".fetch").length;
-        var instruction = containerPipeline.children(".fetch:eq(0)");
-        if (count) {
+    this.decode = function(substituteInstruction, instruction) {//so parte grafica, por enquanto?
+        if (instruction) {
+			var auxSubstI = {Place: substituteInstruction.Place, Instruction: substituteInstruction.Instruction };
             setTimeout(function() {
-				if(substituteInstruction.Place === 'decode')
+				if(auxSubstI.Place === 'decode')
 				{
-					instruction.detach();
-					containerPipeline.append("<div class='pipeline-item background-info decode'>" + substituteInstruction.Instruction.name + "</div>")
+					var elem = $('#entry-' + auxSubstI.Instruction.inOrder);
+					elem.detach();
+					containerPipeline.append(elem);
+					// elem.detach();
+					// containerPipeline.append("<div class='pipeline-item background-info decode'>" + auxSubstI.Instruction.name + "</div>")
 				}
-                instruction.removeClass("fetch");//muda as caracteristicas do html (abaixo) pra passar cada bloquinho para a proxima etapa
-                instruction.addClass("decode");//"<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>"
-            }, 80)
+				else 
+				{
+					var elem = $('#entry-' + instruction.inOrder);
+				}
+				elem.removeClass("fetch");//muda as caracteristicas do html (abaixo) pra passar cada bloquinho para a proxima etapa
+				elem.addClass("decode");//"<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>"
+		}, 80)
         }
 				
     }
 
-    this.load = function(substituteInstruction) {
-        var count = containerPipeline.children(".decode").length;
-        var instruction = containerPipeline.children(".decode:eq(0)");
-        if (count) {
+    this.load = function(substituteInstruction, instruction) {
+		//var elem = containerPipeline.children(".decode:eq(0)");
+        if (instruction) {
+			var auxSubstI = {Place: substituteInstruction.Place, Instruction: substituteInstruction.Instruction };
             setTimeout(function() {
-				if(substituteInstruction.Place == 'load')
+				if(auxSubstI.Place == 'load')
 				{
-					if(substituteInstruction.Instruction.name == 'NoOp')
-					{
-						instruction.detach();
-						containerPipeline.append("<div class='pipeline-item background-danger load'>" + substituteInstruction.Instruction.name + "</div>");
-					}
-					else
-						containerPipeline.append("<div class='pipeline-item background-info load'>" + substituteInstruction.Instruction.name + "</div>");
+					// if(auxSubstI.Instruction.name == 'NoOp')
+					// {
+						// 	elem.detach();
+						// 	containerPipeline.append("<div class='pipeline-item background-danger load'>" + auxSubstI.Instruction.name + "</div>");
+						// }
+						// else
+
+					var elem = $('#entry-' + auxSubstI.Instruction.inOrder);
+					elem.detach();
+					containerPipeline.append(elem);
+							// elem.detach();
+							// containerPipeline.append("<div class='pipeline-item background-info decode'>" + auxSubstI.Instruction.name + "</div>")
 				}
-                instruction.removeClass("decode");//muda as caracteristicas do html pra passar cada bloquinho para a proxima etapa(idem ao anterior)
-                instruction.addClass("load");
+				else 
+				{
+					var elem = $('#entry-' + instruction.inOrder);
+				}
+
+				//containerPipeline.append("<div class='pipeline-item background-info load'>" + auxSubstI.Instruction.name + "</div>");
+                elem.removeClass("decode");//muda as caracteristicas do html pra passar cada bloquinho para a proxima etapa(idem ao anterior)
+                elem.addClass("load");
             }, 100);
         }
     }
@@ -330,7 +349,7 @@ function P5Pipe(htmlClass) {
             }, 120);
         }
 		if(isFlushing)
-		{	
+		{		
 			if(instruction && instruction.type === DATA_TYPES.ARITHMETIC)
 			{
 				result.ula = instruction.executethis();
@@ -373,13 +392,14 @@ function P5Pipe(htmlClass) {
                 elem.addClass("store");
             }, 140);
         }
-        
+        console.log("fillNoop", pipeSim.fillNoOp);
         if (pipeSim.fillNoop === 0) {
             if(result.ula != undefined && instruction && instruction.type === DATA_TYPES.ARITHMETIC)
             {
                 instruction.params.dest.set(result.ula);
             }
-            // Load and Store
+			// Load and Store
+			console.log("instruction && instruction.type === DATA_TYPES.DATA_TRANSFER", instruction)
             if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER) 
             {
                 instruction.executethis(pipeSim.dataMemory);

@@ -137,6 +137,7 @@ function RSHandler(size) {
 
     // Insert a instruction on reservation stations
     this.insert = function(instruction) {
+        if (stations.getRS(instruction)) { return; }
         rename(instruction, arf);
 
         if (instruction.type === DATA_TYPES.ARITHMETIC) {
@@ -161,7 +162,7 @@ function RSHandler(size) {
         else if (instruction.type === DATA_TYPES.CONTROL) {
             let source = isObject(instruction.params.source) ? instruction.params.source : undefined;
             sourceVal = getValue(instruction.params.source);
-            console.log(source, sourceVal);
+//            console.log(source, sourceVal);
             array.push(new RS(instruction, source ? undefined : sourceVal, undefined, source, undefined));
         }
         else {
@@ -181,7 +182,7 @@ function RSHandler(size) {
     // Get rs of instruction
     this.getRS = function(instruction) {
         return array.find(rs => {
-            return rs.getInstruction().cycle === instruction.cycle;
+            return rs.getInstruction().entryOrder === instruction.entryOrder;
         });
     }
 
@@ -189,9 +190,13 @@ function RSHandler(size) {
     this.getExecutables = function(n) {
         let count = 0;
         if (!array.length) { return [null]; }
-        if (!array.find(item => { return item.getInstruction().executedCycles === 0; })) { return [null]; }
+        if (!array.filter(item => { return item.getInstruction().executedCycles === 0; })) { return [null]; }
         return array.filter(rs => {
-            return rs.isExecutable();
+            if (count === n) { return false; }
+            if (rs.isExecutable()) {
+                count++;
+                return true;
+            };
         }).map(rs => { return rs.getInstruction(); });
     }
 
@@ -231,7 +236,7 @@ function rename(instruction, arf) {
     
     if (source) {
         let temp = arf.get(source);
-        console.log(source, source.get(), temp || source.get());
+//        console.log(source, source.get(), temp || source.get());
         instruction.params.source = temp || source.get();
     }
     if (source1) {
