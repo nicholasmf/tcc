@@ -77,6 +77,7 @@ function P5Pipe(htmlClass) {
 		if(!pipeDo.fetch && inBuffer.changedLastIter && !instruction[inBuffer.number])
 		{//se o fetch estiver travado, mas eu mudei meu buffer e o fetch nao tem nada, devo executar mesmo assim
 			instruction[inBuffer.number] = pipeSim.fetchStep(pc, instructions);
+			$("#entry-" + instruction[inBuffer.number].inOrder).addClass('buffer' + inBuffer.number);
 		}
 		
 		if(pipeDo.fetch)

@@ -183,3 +183,17 @@
     padding-right: 0;
     text-align: center;
 }
+
+.upipe .buffer0.fetch {
+    top: 0;
+}
+.upipe .buffer1.fetch {
+    top: 142px;
+}
+
+.vpipe .buffer0.fetch {
+    top: 0;
+}
+.vpipe .buffer1.fetch {
+    top: 142px;
+}
