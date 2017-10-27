@@ -1,87 +1,91 @@
-function fetchExecution(instructions, pc, cycle) {
-	if(instructions[pc])
-	{
-		this.setStepInstruction(instructions[pc].copy());
-		this.setStepInstructionCycle(cycle);
-		if(instructions[pc].type === DATA_TYPES.CONTROL)
-			this.setBranchAlreadyPredicted(false);//para verificar se ja previ o branch, e evita prever de novo se ocorrerem stalls
-	}
-	else
-		this.setStepInstruction(undefined);
-}
-
-function decodeExecution(dh, branchPredictor) {
-    let retArr = [];
-    let instruction = this.getStepInstruction();
-    if (instruction && dh) {
-        retArr[1] = dh.insert(instruction);
-    }
-    else {
-        retArr[1] = true;
-    }
-	var btbResult;	
-	
-	if(instruction && instruction.type === DATA_TYPES.CONTROL && !instruction.alreadyPredicted)//para verificar se ja previ o branch se ele ficar parado
-	{//preciso executar se eu tiver um preditor ativo e se a instrucao for de branch
-		branchPredictorResult = branchPredictor.predict(instruction.address);//branchPredictorResult recebe endereco de previsao se houver
-//		console.log("predictor result is: " + branchPredictorResult);
-        instruction.btbResult = branchPredictorResult !== undefined;
-		this.setBranchAlreadyPredicted(true);
-    }
-	else
-	{
-//		console.log("predictor result is: dont see branch");
-		branchPredictorResult = undefined;
-    }
-    retArr[0] = branchPredictorResult;
-	return retArr;
-}
-
-function loadExecution() {
-
-}
-
-function executeExecution(branchPredictor) {
-	
-    let instruction = this.getStepInstruction();
-    instruction.executedCycles++;
-	
-	if(instruction && instruction.type === DATA_TYPES.ARITHMETIC)
-	{
-		instruction.result = instruction.executethis();
-		//console.log("T0: ", instruction.params.dest);
-	}
-	
-	if (instruction && instruction.type === DATA_TYPES.CONTROL) {
-		if (instruction.name === "BRANCH IF ZERO") {
-			instruction.executethis();
-			branchPredictor.update(instruction.address, instruction.params.branchTo, instruction.params.branchResult);
-		}
-    }
-}
-
-function storeExecution(dataMemory, dh) {
-	
-	let instruction = this.getStepInstruction();
-	
-	if(instruction && instruction.result != undefined && instruction.type === DATA_TYPES.ARITHMETIC)
-	{
-		instruction.params.dest.set(instruction.result);
-	}
-	// Load and Store
-	if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER) 
-	{
-		instruction.executethis(dataMemory);
-    }
-    if (instruction && dh) {
-        dh.wb(instruction);
-    }
-}
-
 function DummyPipe() {
 	
 	const SimplePipe = this;
+
 	
+	function fetchExecution(instructions, pc, cycle) {
+		if(instructions[pc])
+		{
+			var newInst = instructions[pc].copy();
+			newInst.entryOrder = cycle;
+			this.setStepInstruction(newInst);
+			this.setStepInstructionCycle(cycle);
+			if(instructions[pc].type === DATA_TYPES.CONTROL)
+				this.setBranchAlreadyPredicted(false);//para verificar se ja previ o branch, e evita prever de novo se ocorrerem stalls
+		}
+		else
+			this.setStepInstruction(undefined);
+	}
+	
+	function decodeExecution(dh, branchPredictor) {
+		let retArr = [];
+		let instruction = this.getStepInstruction();
+		if (instruction && dh) {
+			retArr[1] = dh.insert(instruction);
+		}
+		else {
+			retArr[1] = true;
+		}
+		var btbResult;	
+		
+		if(instruction && instruction.type === DATA_TYPES.CONTROL && !instruction.alreadyPredicted)//para verificar se ja previ o branch se ele ficar parado
+		{//preciso executar se eu tiver um preditor ativo e se a instrucao for de branch
+			branchPredictorResult = branchPredictor.predict(instruction.address);//branchPredictorResult recebe endereco de previsao se houver
+	//		console.log("predictor result is: " + branchPredictorResult);
+			instruction.btbResult = branchPredictorResult !== undefined;
+			this.setBranchAlreadyPredicted(true);
+		}
+		else
+		{
+	//		console.log("predictor result is: dont see branch");
+			branchPredictorResult = undefined;
+		}
+		retArr[0] = branchPredictorResult;
+		return retArr;
+	}
+	
+	function loadExecution() {
+	
+	}
+	
+	function executeExecution(branchPredictor) {
+		
+		let instruction = this.getStepInstruction();
+		instruction.executedCycles++;
+		
+		if(instruction && instruction.type === DATA_TYPES.ARITHMETIC)
+		{
+			instruction.result = instruction.executethis();
+			//console.log("T0: ", instruction.params.dest);
+		}
+		
+		if (instruction && instruction.type === DATA_TYPES.CONTROL) {
+			if (instruction.name === "BRANCH IF ZERO") {
+				instruction.executethis();
+				branchPredictor.update(instruction.address, instruction.params.branchTo, instruction.params.branchResult);
+			}
+		}
+	}
+	
+	function storeExecution(dataMemory, dh) {
+		
+		let instruction = this.getStepInstruction();
+		
+		if(instruction && instruction.result != undefined && instruction.type === DATA_TYPES.ARITHMETIC)
+		{
+			instruction.params.dest.set(instruction.result);
+		}
+		// Load and Store
+		if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER) 
+		{
+			instruction.executethis(dataMemory);
+		}
+		if (instruction && dh) {
+			dh.wb(instruction);
+		}
+	}
+	
+
 	
     this.fetch = new PipelineStep("fetch", fetchExecution);
 	this.decode = new PipelineStep("decode", decodeExecution);
