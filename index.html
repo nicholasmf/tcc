@@ -37,6 +37,7 @@
         <script type="text/javascript" src="./javascript/dependency-handler/tomasulo.js"></script>
         <script type="text/javascript" src="./javascript/dependency-handler/ignore.js"></script>
         <script type="text/javascript" src="./javascript/dependency-handler/scoreboarding.js"></script>
+        <script type="text/javascript" src="./javascript/processors/p6/reorder-buffer.js"></script>
 		
 		<!-- Pipeline Steps -->
         <script type="text/javascript" src="./javascript/pipeline-steps/base.js"></script>
@@ -84,15 +85,15 @@
                 </select>-->
                 <select class="form-control mr-sm-2" id="selectBP" onchange="setBP()">
                     <option value="">-- Preditor de desvio --</option>
-                    <option value="btb" selected>P5 BTB</option>
-                    <option value="apbtb">Predição adaptativa</option>
+                    <option value="btb">P5 BTB</option>
+                    <option value="apbtb" selected>Predição adaptativa</option>
                 </select>
 
                 <select class="form-control mr-sm-2" id="selectPipe" onchange="setPipe()">
                     <option value="">-- Pipeline --</option>
-                    <option value="dummy" >Simples</option>
-                    <option value="p5" selected>P5</option>
-                    <option value="p6" >P6</option>
+                    <option value="dummy">Simples</option>
+                    <option value="p5">P5</option>
+                    <option value="p6" selected>P6</option>
                 </select>
 
                 <select class="form-control mr-sm-2" id="selectDH" onchange="setDH()">
@@ -100,7 +101,7 @@
                     <option value="ignore" selected>Ignorar</option>
                     <option value="stall">Esperar dependência</option>
                     <option value="OoO">Execução fora de ordem</option>
-                    <option value="OoOrenaming">Execução fora de ordem com renomeamento</option>
+                    <option value="OoOrenaming" selected>Execução fora de ordem com renomeamento</option>
                 </select>
 
                 <select class="form-control mr-sm-2" id="selectTimeInterval" onchange="setTimeInterval()">

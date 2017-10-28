@@ -103,6 +103,11 @@
     opacity: 0;
 }
 
+.pipeline-item.waiting {
+    left: 80%;
+    top: 80px;
+}
+
 #finalList li {
     animation-name: final-list-in;
     animation-duration: 1s;

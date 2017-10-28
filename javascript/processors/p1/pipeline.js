@@ -289,9 +289,6 @@ function P5Pipe(htmlClass) {
         if (pc > -1) {
             var instruction = instructions[pc].copy();
             var instructionElem = $("<div id='entry-" + globalPipeInOrderEntry + "' class='pipeline-item background-info fetch'>" + instruction.name + "</div>");
-			//let entryString = ('#entry-'+instruction[inBuffer.number].inOrder);
-			//let inBufferString = ("buffer-"+inBuffer.number);
-			//let jQEntryString = $(entryString);
                                     //<div class='formato cor posicao'></div>
             //var elem = instructionList.children(":eq(0)");
             //elem.addClass("out");
@@ -303,7 +300,7 @@ function P5Pipe(htmlClass) {
             //setTimeout(function() {
                 //elem.detach();
                 containerPipeline.append(instructionElem);
-				//jQEntryString.addClass(inBufferString);
+
             //}, 60);//talvez nao precise de delay
 			instruction.inOrder = globalPipeInOrderEntry++;
             return instruction;//retorna a instrucao na posicao pc

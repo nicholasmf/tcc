@@ -17,7 +17,7 @@ function DummyPipe() {
 			this.setStepInstruction(undefined);
 	}
 	
-	function decodeExecution(dh, branchPredictor) {
+	function decodeExecution(branchPredictor, dh) {
 		let retArr = [];
 		let instruction = this.getStepInstruction();
 		if (instruction && dh) {
@@ -48,7 +48,7 @@ function DummyPipe() {
 	
 	}
 	
-	function executeExecution(branchPredictor) {
+	function executeExecution(branchPredictor, dh) {
 		
 		let instruction = this.getStepInstruction();
 		instruction.executedCycles++;
@@ -81,6 +81,7 @@ function DummyPipe() {
 			instruction.executethis(dataMemory);
 		}
 		if (instruction && dh) {
+			dh.execute(instruction);
 			dh.wb(instruction);
 		}
 	}
@@ -118,11 +119,13 @@ function DummyPipe() {
         let dhRet = dependencyHandler ? dependencyHandler.getExecutables(1)[0] : null;
         let nextExecIns = dependencyHandler && decodeI ? ( dhRet === undefined ? new Instruction("NoOp") : dhRet === null ? decodeI : dhRet) : decodeI;
         if (decodeI && !decodeI.executeMe) { nextExecIns = decodeI; }
-        if (!dhResult) { nextExecIns = new Instruction("NoOp"); }
-        if (nextExecIns && nextExecIns.name === "NoOp") { nextExecIns.cycle = cycle; }
+        else if (!dhResult) { nextExecIns = new Instruction("NoOp"); }
+        if (nextExecIns && nextExecIns.name === "NoOp" && !nextExecIns.cycle) { nextExecIns.cycle = cycle; }
         let stallDecode = nextExecIns && nextExecIns.name === "NoOp" && decodeI;
         //console.log(fetchI, decodeI, executeI, loadI, storeI);
-        
+		
+		let out = this.store.getStepInstruction();
+		this.removeHTMLInstruction(out);		
         this.store.setStepInstruction( this.load.getStepInstruction() );
 		this.load.setStepInstruction( this.execute.getStepInstruction() );
 		this.execute.setStepInstruction( nextExecIns );
@@ -152,7 +155,7 @@ function DummyPipe() {
 			if(decodeI.executeMe)
 			{
 //                console.log("executing decode");
-                [predictionAddr, dhResult] = this.decode.execution(dependencyHandler, branchPredictor);
+                [predictionAddr, dhResult] = this.decode.execution(branchPredictor, dependencyHandler);
             }
 			this.decode.render("fetch", containerPipeline);
 		}
@@ -162,10 +165,10 @@ function DummyPipe() {
 
 			if(executeI.executeMe)
 			{
-				this.execute.execution(branchPredictor);
+				this.execute.execution(branchPredictor, dependencyHandler);
 //				console.log("executing execute");
 			}
-			if (!stallDecode) this.execute.render("decode", containerPipeline);
+			this.execute.render("decode", containerPipeline);
 		}
 		
 		
@@ -195,9 +198,7 @@ function DummyPipe() {
 			// }
 			this.store.render("load", containerPipeline);
 		}	
-		
-		this.removeHTMLInstruction(1200);
-		
+				
 		/////////////////// fim da execucao das etapas /////////////////////////////
 		
 		//  console.log(this.fetch.getStepInstruction());
@@ -355,25 +356,21 @@ function DummyPipe() {
 		else {
 			elem = containerPipeline.children(`.${instruction.cycle}-${instruction.address}`);
 		}
-		setTimeout(function() {
-            elem.removeClass(prevStep);//muda as caracteristicas do html (abaixo) pra passar cada bloquinho para a proxima etapa
-            elem.addClass(self.getStepName());//"<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>"
-			if (!instruction.executeMe) {
-				elem.removeClass('background-info');
-				elem.addClass('background-disabled');
-			}
-            else if (elem.hasClass("background-info") /*&& !isFlushing*/) {//background info eh "azul"
-                elem.removeClass("background-info");//retira o azul do bloquinho e coloca verde
-                elem.addClass("background-success");//nota: essas cores estao no .css              
-            }
-        }, 80)
+		elem.removeClass(prevStep);//muda as caracteristicas do html (abaixo) pra passar cada bloquinho para a proxima etapa
+		elem.addClass(self.getStepName());//"<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>"
+		if (!instruction.executeMe) {
+			elem.removeClass('background-info');
+			elem.addClass('background-disabled');
+		}
+		else if (elem.hasClass("background-info") /*&& !isFlushing*/) {//background info eh "azul"
+			elem.removeClass("background-info");//retira o azul do bloquinho e coloca verde
+			elem.addClass("background-success");//nota: essas cores estao no .css              
+		}
     }
 
     // Remove First element on store step
-    this.removeHTMLInstruction = function(delay) {
-        let instruction = SimplePipe.store.getStepInstruction();
+    this.removeHTMLInstruction = function(instruction) {
 		if (!instruction) { return; }
-        //var count =  containerPipeline.children(`#${prevStep}`).length;
 		var elem;
 		if (instruction.name === "NoOp") {
 			elem = containerPipeline.children(`.noop-${instruction.cycle}`);
@@ -382,29 +379,28 @@ function DummyPipe() {
 			elem = containerPipeline.children(`.${instruction.cycle}-${instruction.address}`);
 		}
 
-        var instructionList = $("#finalList");
-        var instructionElem = $("<li class='list-group-item'>" + elem.text() + "</li>");
+		if (!elem ) { return; }
+		var instructionList = $("#finalList");
+		var instructionElem = $("<li class='list-group-item'>" + elem.text() + "</li>");
 
-        if (elem.hasClass("background-success")) {
-            instructionElem.addClass("list-group-item-success");
-        }
-        if (elem.hasClass("background-danger")) {
-            instructionElem.addClass("list-group-item-danger");
-        }
-        if (elem.hasClass("background-disabled")) {
-            instructionElem.addClass("disabled");
-        }
+		if (elem.hasClass("background-success")) {
+			instructionElem.addClass("list-group-item-success");
+		}
+		if (elem.hasClass("background-danger")) {
+			instructionElem.addClass("list-group-item-danger");
+		}
+		if (elem.hasClass("background-disabled")) {
+			instructionElem.addClass("disabled");
+		}
 
-        setTimeout(function() {
-            elem.detach();
-            instructionList.append(instructionElem);
-            instructionList.animate({
-                scrollTop: instructionList[0].scrollHeight
-            }, 200);
-        }, delay);
-        setTimeout(function() {
-            elem.addClass("out");            
-        }, delay - 200);
+		elem.addClass("out");            
+		setTimeout(function() {
+			elem.detach();
+			instructionList.append(instructionElem);
+			instructionList.animate({
+				scrollTop: instructionList[0].scrollHeight
+			}, 200);
+		}, 100);
     }
 
     this.insertNoOp = function(step) {

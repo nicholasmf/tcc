@@ -18,7 +18,7 @@ function Register(name, index) {
         return register.value;
     }
     this.set = function(value, noAnimation) {
-        register.value = value;
+        if (isNumber(value)) register.value = value;
 
         var containerName, registerName;
         if (register.name && register.name.indexOf("temp") !== -1) { 
@@ -32,7 +32,7 @@ function Register(name, index) {
         /****** Update render *****/
         const container = $(`#${containerName} .row`);
         let elem = container.children().eq(register.index);
-        $(elem).find('.panel-body').text(value);
+        $(elem).find('.panel-body').text(register.value);
         $(elem).find('.panel-heading').text(registerName);
 
         if (noAnimation) { return; }

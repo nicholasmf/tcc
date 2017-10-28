@@ -163,7 +163,7 @@ function setCode() {
             iSet.LOAD(T1, 5),
             iSet.MUL(T0, 4, 5),
             iSet.ADD(T2, T0, T1),
-            iSet.ADD(T3, 0, 6),
+            iSet.ADD(T3, T2, T0),
             iSet.ADD(T0, T0, 2),
             iSet.ADD(T0, 6, 1)
         ];
@@ -191,11 +191,11 @@ function setCode() {
 code = [
 
             iSet.LOADI(T0, 0),
+            iSet.LOADI(T1, -7),
             iSet.BRANCH_IF_ZERO(T0, 5),
             iSet.DUMMY(),
             iSet.DUMMY(),
             iSet.DUMMY(),
-            iSet.LOADI(T1, -4),
             iSet.DUMMY(),
             iSet.ADD(T1, 1),
             iSet.DUMMY(),
