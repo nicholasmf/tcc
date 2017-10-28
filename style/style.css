@@ -184,16 +184,111 @@
     text-align: center;
 }
 
-.upipe .buffer0.fetch {
-    top: 0;
+/* fetch buffer draw */
+.upipe .buffer-0.fetch {
+    top: 35px;
 }
-.upipe .buffer1.fetch {
-    top: 142px;
+.upipe .buffer-1.fetch {
+    top: -10px;
 }
 
-.vpipe .buffer0.fetch {
+.vpipe .buffer-0.fetch {
+    top: 45px;
+}
+.vpipe .buffer-1.fetch {
     top: 0;
 }
-.vpipe .buffer1.fetch {
-    top: 142px;
+
+/*creates 4 separators for pipes with 5 stages */ 
+.fiveStepSeparator {
+    border-left: 5px dotted #3333333b;
+    border-right: 5px dotted #3333333b;
+    position: absolute;
+    width: 20%;
+    height: 90%;
+    top: -8%;
+    z-index: -1;
+}
+.fiveStepLeft {
+    left: 22%;
+}
+.fiveStepRight {
+    left: 62%;
+}
+/*end of creates 4 separators for pipes with 5 stages */
+
+/*sets height for the 4 p5 fetch buffers*/
+#upipeId .p5Buffer-0 {
+    top: 36%;
+}
+#upipeId .p5Buffer-1 {
+    top: -9%;
+}
+#vpipeId .p5Buffer-0 {
+    top: 46%;
+}
+#vpipeId .p5Buffer-1 {
+    top: 1%;
+}
+/*end of sets height for the 4 p5 fetch buffers*/
+
+/*sets height of the final 4 stages of each pipe in p5*/
+.upipeHeight {
+    top: 21%;
+}
+.vpipeHeight {
+    top: 21%;
+}
+/*end of sets height of the final 4 stages of each pipe in p5*/
+
+/*set horizontal offset for step location blocks for 5 stage pipes */
+.fiveStepFetchGhost {
+    left: 10%;
+}
+.fiveStepDecodeGhost {
+    left: 30%;
+}
+.fiveStepLoadGhost {
+    left: 50%;
+}
+.fiveStepExecuteGhost {
+	left: 70%;
+}
+.fiveStepStoreGhost {
+	left: 90%;
+}
+/*end of set horizontal offset for step location blocks for 5 stage pipes */
+
+/*all stepContainers for all pipes are created equal */
+.fiveStepContainer {
+	border: 1px dashed #3333333b;
+    width: 42px;
+    height: 42px;
+    position: absolute;
+	z-index: -1;
+}
+/*end of all stepContainers for all pipes are created equal */
+
+.fiveStepText {
+	z-index: -2;
+	position: absolute;
+	opacity: 0.15;
+	color: black;
+	top: 207px;
+	font-size: 42px;
+}
+.p5decode1{
+	left: 307px;
+}
+.p5decode2{
+	left: 456px;
+}
+.p5execute{
+	left: 638px;
+}
+.p5store{
+	left: 827px;
+}
+.p5fetch{
+	left: 1023px;
 }

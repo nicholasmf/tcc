@@ -4,8 +4,9 @@ var globalPipeInOrderEntry = 0;
 function P5Arq ()
 {
 	
-	var uPipe = new P5Pipe('upipe');
-	var vPipe = new P5Pipe('vpipe');
+	var pipeName = ['upipe', 'vpipe'];	
+	var uPipe = new P5Pipe(pipeName[0]);
+	var vPipe = new P5Pipe(pipeName[1]);
 	
 	const simArq = this;
     var execution;
@@ -32,6 +33,21 @@ function P5Arq ()
 		uPipe.init(dataMemory);
 		vPipe.init(dataMemory);
     }
+	
+	/*
+	$("#initialRow").append('<div id="dadrator" class="pipeVisualizationHelper"></div>');
+	$("#dadrator").append('<div id="separatorId" class="stepSeparator"></div>');
+	
+	$("#dadrator").append('<div id="stepTextId" class="stepText"></div>');
+
+
+		
+	
+
+		
+	
+	
+	*/
 	
 	this.pipeLoop = function(instructions, execution){
 		console.log("////////////////////////////////////////////////////////////////////////////////////////////////////////////");

@@ -8,9 +8,33 @@ function P5Pipe(htmlClass) {
 	var instruction = new Array(2);//simula meu buffer de 2 posicoes
 	var result = {}, lastResult = {};
     var decodeI, loadI, executeI, storeI; //var guarda a instrucao I na etapa n (nI)
-	var containerPipeline = $('<div class="container pipeline ' + htmlClass + '"></div>');
+	
+	
+	var containerPipeline = $('<div id="'+ htmlClass + 'Id" class="container pipeline ' + htmlClass + '"></div>');
 	$("#pipelineDivGoesBeneath").append(containerPipeline);
-    
+	var querySelectorString = "#" + htmlClass + "Id";
+	for(let i=0; i<2; i++)
+	{//renderiza os lugares tracejados onde as instrucoes param
+		$("#" + htmlClass + "Id").append('<div class="p5Buffer-' + i + ' fiveStepFetchGhost fiveStepContainer"></div>');
+	}
+	var stepNameArr = ['fiveStepDecodeGhost', 'fiveStepLoadGhost', 'fiveStepExecuteGhost', 'fiveStepStoreGhost', 'fiveStepFetchGhost'];
+	for(let j=0; j<4; j++)
+	{
+		$(querySelectorString).append('<div class="fiveStepContainer ' + stepNameArr[j] + ' ' + htmlClass + 'Height"></div>');
+	}
+	
+	
+	$(querySelectorString).append('<div class="fiveStepSeparator fiveStepLeft"></div>');
+	$(querySelectorString).append('<div class="fiveStepSeparator fiveStepRight"></div>');
+	
+	/*
+	var p5NameArr = ['decode1', 'decode2', 'execute', 'store', 'fetch'];
+	var textIdentifierArr = ['p5decode1', 'p5decode2', 'p5execute', 'p5store', 'p5fetch']
+	for(let i=0; i<5; i++)
+	{
+		$(querySelectorString).append('<div class="fiveStepText ' + textIdentifierArr[i] + '">'+ p5NameArr[i] + '</div>');
+	}
+	*/
     this.init = function(dataMemory) {
         pipeSim.dataMemory = dataMemory;
     }
@@ -77,7 +101,11 @@ function P5Pipe(htmlClass) {
 		if(!pipeDo.fetch && inBuffer.changedLastIter && !instruction[inBuffer.number])
 		{//se o fetch estiver travado, mas eu mudei meu buffer e o fetch nao tem nada, devo executar mesmo assim
 			instruction[inBuffer.number] = pipeSim.fetchStep(pc, instructions);
-			$("#entry-" + instruction[inBuffer.number].inOrder).addClass('buffer' + inBuffer.number);
+			if(instruction[inBuffer.number])
+			{
+				$('#entry-'+instruction[inBuffer.number].inOrder).addClass("buffer-"+inBuffer.number);
+			}
+			
 		}
 		
 		if(pipeDo.fetch)
@@ -144,7 +172,12 @@ function P5Pipe(htmlClass) {
 			{
 				instruction[inBuffer.number] = pipeSim.fetchStep(pc, instructions);
 				if(instruction[inBuffer.number])
+				{
+					
 					instruction[inBuffer.number].cycle = cycle;
+					//console.log(entryString, inBufferString);
+					$('#entry-'+instruction[inBuffer.number].inOrder).addClass("buffer-"+inBuffer.number);
+				}
 			}
 			else
 			{
@@ -255,7 +288,10 @@ function P5Pipe(htmlClass) {
         // else 
         if (pc > -1) {
             var instruction = instructions[pc].copy();
-            var instructionElem = $("<div id='entry-"+globalPipeInOrderEntry +"' class='pipeline-item background-info fetch'>" + instruction.name + "</div>");
+            var instructionElem = $("<div id='entry-" + globalPipeInOrderEntry + "' class='pipeline-item background-info fetch'>" + instruction.name + "</div>");
+			//let entryString = ('#entry-'+instruction[inBuffer.number].inOrder);
+			//let inBufferString = ("buffer-"+inBuffer.number);
+			//let jQEntryString = $(entryString);
                                     //<div class='formato cor posicao'></div>
             //var elem = instructionList.children(":eq(0)");
             //elem.addClass("out");
@@ -264,10 +300,11 @@ function P5Pipe(htmlClass) {
             $("#instructions").animate({
                 scrollTop: 42*(pc-1) - 4
             }, 200);
-            setTimeout(function() {
+            //setTimeout(function() {
                 //elem.detach();
                 containerPipeline.append(instructionElem);
-            }, 60);//talvez nao precise de delay
+				//jQEntryString.addClass(inBufferString);
+            //}, 60);//talvez nao precise de delay
 			instruction.inOrder = globalPipeInOrderEntry++;
             return instruction;//retorna a instrucao na posicao pc
         }
