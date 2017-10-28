@@ -12,6 +12,7 @@ function P5Pipe(htmlClass) {
 	
 	var containerPipeline = $('<div id="'+ htmlClass + 'Id" class="container pipeline ' + htmlClass + '"></div>');
 	$("#pipelineDivGoesBeneath").append(containerPipeline);
+	
 	var querySelectorString = "#" + htmlClass + "Id";
 	for(let i=0; i<2; i++)
 	{//renderiza os lugares tracejados onde as instrucoes param
@@ -27,14 +28,6 @@ function P5Pipe(htmlClass) {
 	$(querySelectorString).append('<div class="fiveStepSeparator fiveStepLeft"></div>');
 	$(querySelectorString).append('<div class="fiveStepSeparator fiveStepRight"></div>');
 	
-	/*
-	var p5NameArr = ['decode1', 'decode2', 'execute', 'store', 'fetch'];
-	var textIdentifierArr = ['p5decode1', 'p5decode2', 'p5execute', 'p5store', 'p5fetch']
-	for(let i=0; i<5; i++)
-	{
-		$(querySelectorString).append('<div class="fiveStepText ' + textIdentifierArr[i] + '">'+ p5NameArr[i] + '</div>');
-	}
-	*/
     this.init = function(dataMemory) {
         pipeSim.dataMemory = dataMemory;
     }

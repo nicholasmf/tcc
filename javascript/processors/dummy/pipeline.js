@@ -108,6 +108,23 @@ function DummyPipe() {
 	var containerPipeline = $('<div class="container pipeline dummy"></div>');
 	$("#pipelineDivGoesBeneath").append(containerPipeline);
 	
+	
+	var DummyNameArr = ['decode', 'load', 'execute', 'store', 'fetch'];
+	var textIdentifierArr = ['dummyDecode', 'dummyLoad', 'DummyExecute', 'DummyStore', 'DummyFetch'];
+	for(let i=0; i<5; i++)
+	{
+		$("#pipelineDivGoesBeneath").append('<div class="fiveStepText ' + textIdentifierArr[i] + '">'+ DummyNameArr[i] + '</div>');
+	}
+	
+	var stepNameArr = ['fiveStepDecodeGhost', 'fiveStepLoadGhost', 'fiveStepExecuteGhost', 'fiveStepStoreGhost', 'fiveStepFetchGhost'];
+	for(let j=0; j<5; j++)
+	{
+		$(containerPipeline).append('<div class="fiveStepContainer ' + stepNameArr[j] + ' dummyHeight"></div>');
+	}
+	
+	$(containerPipeline).append('<div class="fiveStepSeparator fiveStepLeft"></div>');
+	$(containerPipeline).append('<div class="fiveStepSeparator fiveStepRight"></div>');
+	
 	this.init = function(dataMemory) {
 		SimplePipe.dataMemory = dataMemory;
     }

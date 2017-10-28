@@ -39,15 +39,14 @@ function P5Arq ()
 	$("#dadrator").append('<div id="separatorId" class="stepSeparator"></div>');
 	
 	$("#dadrator").append('<div id="stepTextId" class="stepText"></div>');
-
-
-		
-	
-
-		
-	
-	
 	*/
+
+	var p5NameArr = ['decode1', 'decode2', 'execute', 'store', 'fetch'];
+	var textIdentifierArr = ['p5decode1', 'p5decode2', 'p5execute', 'p5store', 'p5fetch']
+	for(let i=0; i<5; i++)
+	{
+		$("#pipelineDivGoesBeneath").append('<div class="fiveStepText ' + textIdentifierArr[i] + '">'+ p5NameArr[i] + '</div>');
+	}
 	
 	this.pipeLoop = function(instructions, execution){
 		console.log("////////////////////////////////////////////////////////////////////////////////////////////////////////////");

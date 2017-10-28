@@ -225,7 +225,7 @@ function Simulator() {
         var instructionsList = document.getElementById("instructions");
         instructions.map((instruction) => {
             var newItem = document.createElement('li');
-            newItem.textContent = instruction.name;
+            newItem.textContent = (instruction.address + ' ' + instruction.name);
             newItem.className = 'list-group-item';
             instructionsList.appendChild(newItem);
         });
