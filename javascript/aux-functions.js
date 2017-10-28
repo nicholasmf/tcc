@@ -25,7 +25,7 @@ function getValue(elem)
 /**
  * 
  * @param instruction
- * Returns a object with:
+ * Returns an object with:
  * - name: name of the operand (dest, source1, address...)
  * - value: register or integer
  * - isRegister: boolean, true if operand is a register

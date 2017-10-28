@@ -344,7 +344,25 @@ function DummyPipe() {
         var instruction = this.getStepInstruction();
         //console.log(instruction);
         if (!instruction) { return; }
-        var instructionElem = $(`<div class='pipeline-item background-info fetch ${instruction.cycle}-${instruction.address}'>${instruction.name}</div>`);
+		var instructionOperands = getOperands(instruction);
+		var instructionOperandsString = '(';
+		for(let i=0; i<instructionOperands.length; i++)
+		{
+			if(instructionOperands[i].isRegister)
+			{
+				instructionOperandsString = instructionOperandsString + instructionOperands[i].value.name;
+			}
+			else
+			{
+				instructionOperandsString = instructionOperandsString + instructionOperands[i].value;
+			}
+			if(i != instructionOperands.length - 1)
+			{
+				instructionOperandsString = instructionOperandsString + ', ';
+			}
+		}
+		instructionOperandsString = instruction.name + '<br>' +instructionOperandsString + ')';
+        var instructionElem = $(`<div class='pipeline-item background-info fetch ${instruction.cycle}-${instruction.address}'>${instructionOperandsString}</div>`);
                                 //<div class='formato cor posicao'></div>
         //var elem = instructionList.children(":eq(0)");
         //elem.addClass("out");

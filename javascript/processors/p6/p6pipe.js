@@ -404,7 +404,25 @@ function P6Pipe() {
         //console.log(instruction);
         instructions.map(instruction => {
             if (instruction.cycle !== cycle) { return; }
-            var instructionElem = $(`<div class='pipeline-item background-info fetch ${instruction.cycle}-${instruction.address}'>${instruction.name}</div>`);
+			var instructionOperands = getOperands(instruction);
+			var instructionOperandsString = '(';
+			for(let i=0; i<instructionOperands.length; i++)
+			{
+				if(instructionOperands[i].isRegister)
+				{
+					instructionOperandsString = instructionOperandsString + instructionOperands[i].value.name;
+				}
+				else
+				{
+					instructionOperandsString = instructionOperandsString + instructionOperands[i].value;
+				}
+				if(i != instructionOperands.length - 1)
+				{
+					instructionOperandsString = instructionOperandsString + ', ';
+				}
+			}
+			instructionOperandsString = '<br>' +instructionOperandsString + ')';
+            var instructionElem = $(`<div class='pipeline-item background-info fetch ${instruction.cycle}-${instruction.address}'>${instruction.name}${instructionOperandsString}</div>`);
             var elem = instructionList.children(`:eq(${instruction.address})`);
             elem.addClass('active');
             containerPipeline.append(instructionElem);

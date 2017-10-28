@@ -281,7 +281,25 @@ function P5Pipe(htmlClass) {
         // else 
         if (pc > -1) {
             var instruction = instructions[pc].copy();
-            var instructionElem = $("<div id='entry-" + globalPipeInOrderEntry + "' class='pipeline-item background-info fetch'>" + instruction.name + "</div>");
+			var instructionOperands = getOperands(instruction);
+			var instructionOperandsString = '(';
+			for(let i=0; i<instructionOperands.length; i++)
+			{
+				if(instructionOperands[i].isRegister)
+				{
+					instructionOperandsString = instructionOperandsString + instructionOperands[i].value.name;
+				}
+				else
+				{
+					instructionOperandsString = instructionOperandsString + instructionOperands[i].value;
+				}
+				if(i != instructionOperands.length - 1)
+				{
+					instructionOperandsString = instructionOperandsString + ', ';
+				}
+			}
+			instructionOperandsString = instructionOperandsString + ')';
+            var instructionElem = $("<div id='entry-" + globalPipeInOrderEntry + "' class='pipeline-item background-info fetch'>" + instruction.name + "<br>" + instructionOperandsString + "</div>");
                                     //<div class='formato cor posicao'></div>
             //var elem = instructionList.children(":eq(0)");
             //elem.addClass("out");
