@@ -14,25 +14,35 @@ function ARF() {
         tempI.pointedName = register.name;
         tempI.set(register.get());
         if (tempArrayPos === tempArraySize) tempArrayPos = 0;
-        memory[i] = tempI;
+        if (!memory[i]) { memory[i] = []; }
+        memory[i].push(tempI);
         return tempI;
     }
 
-    // Get correspondent of a register
+    // Get correspondent temp of a register
     this.get = function(register) {
         let i = register.index;
-        return memory[i];
+        if (!memory[i]) { return undefined; }
+        let last = memory[i].length - 1;
+        return memory[i][last];
     }
 
     // Remove temp register
-    this.remove = function(register) {
-        var index = -1;
+    this.remove = function(tempRegister) {
+        var index = -1, tempIndex = -1, isLast = false;
         memory.forEach((item, i) => {
-            if (item === register) index = i; 
+            let found = item.find(temp => { return temp === tempRegister; });
+            if (found) { 
+                index = i;
+                tempIndex = item.indexOf(found);
+                if (tempIndex === item.length - 1) isLast = true;
+            }
         });
         if (index > -1) {
-            memory[index].pointedName = undefined;
-            memory[index] = undefined;
+            tempRegister.pointedName = '-';
+            tempRegister.set();
+            memory[index].splice(tempIndex, 1);
+            //if (isLast) return regArray[index];
             return regArray[index];
         }
         return undefined;      
@@ -62,7 +72,7 @@ function RS(ins, vj, vk, qj, qk, a) {
     var busy = false;
     var Vj, Vk, Qj, Qk, A;
     var instruction;
-    var executed = false;
+    var executing = false;
     // Init
     busy = true;
     instruction = ins;
@@ -94,7 +104,7 @@ function RS(ins, vj, vk, qj, qk, a) {
 
      // Return if is executable and is not executing (no more dependencies) 
      this.isExecutable = function() {
-        if (instruction.executedCycles) return false;
+        if (executing) return false;
         if (instruction.type === DATA_TYPES.DATA_TRANSFER) {
             return A !== undefined;
         }
@@ -118,7 +128,15 @@ function RS(ins, vj, vk, qj, qk, a) {
              Qk = undefined;
              Vk = register.get();
          }
-     }
+    }
+
+    this.setExecuting = function() {
+        executing = true;
+    }
+
+    this.getExecuting = function() {
+        return executing;
+    }
 }
 
 // Reservation stations handler
@@ -138,6 +156,7 @@ function RSHandler(size) {
     // Insert a instruction on reservation stations
     this.insert = function(instruction) {
         if (stations.getRS(instruction)) { return; }
+        if (instruction === "NoOp") { return; }
         rename(instruction, arf);
 
         if (instruction.type === DATA_TYPES.ARITHMETIC) {
@@ -190,11 +209,12 @@ function RSHandler(size) {
     this.getExecutables = function(n) {
         let count = 0;
         if (!array.length) { return [null]; }
-        if (!array.filter(item => { return item.getInstruction().executedCycles === 0; })) { return [null]; }
+        if (!array.find(item => { return !item.getExecuting(); })) { return [null]; }
         return array.filter(rs => {
             if (count === n) { return false; }
             if (rs.isExecutable()) {
                 count++;
+                rs.setExecuting();
                 return true;
             };
         }).map(rs => { return rs.getInstruction(); });
@@ -206,11 +226,20 @@ function RSHandler(size) {
         if (!rs) return;
         let dest = instruction.params.dest;
         if (isObject(dest)) {
-            stations.update(dest);
+//            stations.update(dest);
             let originalRegister = arf.remove(dest);
             if (originalRegister) originalRegister.set(dest.get());
         }
         return true;
+    }
+
+    this.execute = function(instruction) {
+        let rs = stations.getRS(instruction);
+        if (!rs) return;
+        let dest = instruction.params.dest;
+        if (isObject(dest)) {
+            stations.update(dest);
+        }
     }
 
     this.remove = function(instruction) {
@@ -250,7 +279,6 @@ function rename(instruction, arf) {
     if (dest) {
         instruction.params.dest = arf.update(dest);
     }
-
 }
 
 // let arf = new ARF();

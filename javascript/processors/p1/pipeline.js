@@ -264,10 +264,10 @@ function P5Pipe(htmlClass) {
             $("#instructions").animate({
                 scrollTop: 42*(pc-1) - 4
             }, 200);
-            setTimeout(function() {
+            //setTimeout(function() {
                 //elem.detach();
                 containerPipeline.append(instructionElem);
-            }, 60);//talvez nao precise de delay
+            //}, 60);//talvez nao precise de delay
 			instruction.inOrder = globalPipeInOrderEntry++;
             return instruction;//retorna a instrucao na posicao pc
         }

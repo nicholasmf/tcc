@@ -4,7 +4,7 @@ function P6PipelineStep(stepName, stepExecution, params) {
     const name = stepName;
     this.execution = stepExecution;
     this.count = 0;
-    var maxSize = 3;
+    var maxSize = params.maxSize || 3;
 
 	var instructions = [];
     for (let property in params) {
@@ -53,8 +53,17 @@ function P6PipelineStep(stepName, stepExecution, params) {
 
     this.disableInstructions = function(start) {
         instructions.map(instruction => {
-            if (!start || (isNumber(start) && instruction.entryOrder > start)) {
+            if (!isNumber(start) || (isNumber(start) && instruction.entryOrder > start)) {
                 instruction.executeMe = false;
+                var elem;
+                if (instruction.name === "NoOp") {
+                    elem = pipeStep.containerPipeline.children(`.noop-${instruction.cycle}`);
+                }
+                else {
+                    elem = pipeStep.containerPipeline.children(`.${instruction.cycle}-${instruction.address}`);
+                }
+                elem.removeClass('background-info');
+                elem.addClass('background-disabled');
             }
         });
     }
@@ -70,7 +79,7 @@ function P6PipelineStep(stepName, stepExecution, params) {
     this.getNInstructions = function(n, filter) {
         let count = 0;
         let ins = instructions.filter(instruction => {
-            let ret = (count < n && 
+            let ret = ((!isNumber(n) || count < n) && 
                 (!filter || (filter && filter(instruction))));
             if (ret) { count++; }
             return ret;
@@ -106,6 +115,7 @@ function P6PipelineStep(stepName, stepExecution, params) {
 	
     this.render = function(prevStep, containerPipeline) {
         //var count =  containerPipeline.children(`#${prevStep}`).length;
+        const self = this;
         instructions.map(instruction => {
             var elem;
             if (instruction.name === "NoOp") {
@@ -114,22 +124,29 @@ function P6PipelineStep(stepName, stepExecution, params) {
             else {
                 elem = containerPipeline.children(`.${instruction.cycle}-${instruction.address}`);
             }
-            setTimeout(function() {
+            //setTimeout(function() {
                 elem.removeClass(prevStep);//muda as caracteristicas do html (abaixo) pra passar cada bloquinho para a proxima etapa
                 elem.addClass(name);//"<div class='pipeline-item background-info fetch'>" + instruction.name + "</div>"
                 if (!instruction.executeMe) {
                     elem.removeClass('background-info');
                     elem.addClass('background-disabled');
                 }
-            }, 80);
+                self.offsetRender(containerPipeline);
+            //}, 80);
         });
-        setTimeout(() => { pipeStep.offsetRender(prevStep, containerPipeline); }, 80);
+        //setTimeout(() => { pipeStep.offsetRender(prevStep, containerPipeline); }, 80);
     }
-    this.offsetRender = function(prevStep, containerPipeline) {
-        let elems = containerPipeline.children(`.${prevStep}`);
-        elems.map((i, elem) => {
-            let top = 80 * i;
-            $(elem).css("top", `${top}px`);
+    this.offsetRender = function(containerPipeline) {
+        //let elems = containerPipeline.children(`.${prevStep}`);
+        instructions.map((instruction, i) => {
+            var elem;
+            if (instruction.name === "NoOp") {
+                elem = containerPipeline.children(`.noop-${instruction.cycle}`);
+            }
+            else {
+                elem = containerPipeline.children(`.${instruction.cycle}-${instruction.address}`);
+            }
+            elem.css("top", (80 * i + 'px'));
         });
     }
 }
