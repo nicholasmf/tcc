@@ -11,7 +11,11 @@ function DummyPipe() {
 			this.setStepInstruction(newInst);
 			this.setStepInstructionCycle(cycle);
 			if(instructions[pc].type === DATA_TYPES.CONTROL)
+			{
 				this.setBranchAlreadyPredicted(false);//para verificar se ja previ o branch, e evita prever de novo se ocorrerem stalls
+				newInst.renderAlreadyPredicted = false;
+				newInst.renderAlreadyBranched = false;
+			}
 		}
 		else
 			this.setStepInstruction(undefined);
@@ -301,13 +305,15 @@ function DummyPipe() {
 		//////end of pipeline flushing control //////////////////////
 		
 		
-		if(decodeI && decodeI.type === DATA_TYPES.CONTROL && decodeI.executeMe)
+		if(decodeI && decodeI.type === DATA_TYPES.CONTROL && decodeI.executeMe && !decodeI.renderAlreadyPredicted)
 		{
-				SimplePipe.renderPrediction(predictionAddr);	
+				SimplePipe.renderPrediction(predictionAddr);
+				decodeI.renderAlreadyPredicted = true;
 		}
-		if(executeI && executeI.type === DATA_TYPES.CONTROL && executeI.executeMe)
+		if(executeI && executeI.type === DATA_TYPES.CONTROL && executeI.executeMe  && !executeI.renderAlreadyBranched)
 		{
-			SimplePipe.renderBranch(executeI);	
+			SimplePipe.renderBranch(executeI);
+			executeI.renderAlreadyBranched = true;
 		}
 		
 //		console.log("flushControl: " + flushControl + " cycle: " + cycle + " stopFlushControl: " + stopFlushControl);
