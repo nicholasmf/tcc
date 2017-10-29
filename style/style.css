@@ -436,3 +436,35 @@
     top: 38%;
     font-size: 30px;
 }
+
+.p6decodePredict-0 {
+	position: absolute;
+	left: 29%;
+	top: -11%
+}
+.p6decodePredict-1 {
+    position: absolute;
+    left: 29%;
+    top: 27%;
+}
+.p6decodePredict-2 {
+    position: absolute;
+    left: 29%;
+    top: 64%;
+}
+
+.p6ExecuteBranch-0 {/*x coordinate is the same*/
+	position: absolute;
+    left: 67%;
+    top: -11%
+}
+.p6ExecuteBranch-1 {/*x coordinate is the same*/
+	position: absolute;
+    left: 67%;
+    top: 27%;
+}
+.p6ExecuteBranch-2 {/*x coordinate is the same*/
+	position: absolute;
+    left: 67%;
+    top: 64%;
+}

@@ -15,6 +15,8 @@ function P6Pipe() {
                 if(instructions[pc + i].type === DATA_TYPES.CONTROL)
                 {
                     newInst.alreadyPredicted = false;//para verificar se ja previ o branch, e evita prever de novo se ocorrerem stalls
+					newInst.renderAlreadyPredicted = false;
+					newInst.renderAlreadyBranched = false;
                 }
             }
             // else {
@@ -141,6 +143,46 @@ function P6Pipe() {
 	for(let j=0; j<6; j++)
 	{
 		$('.p6').append('<div class="p6StepName p6' + p6StepName[j] + '">' + p6StepName[j] + '</div>');
+	}
+	
+	this.renderPrediction = function(predictionAddr, i, instruction)
+	{
+		if(predictionAddr[i] && !instruction.renderAlreadyPredicted)
+		{//se houver um predictionAddr, houve uma previsao positiva
+			$('.p6').append("<div class='p6decodePredict-" + i + "' positivePredict'>Jump to: " + predictionAddr[i] +  "</div>");
+		}
+		else if(instruction && !instruction.renderAlreadyPredicted)
+		{//se for undefined, ou previ falso ou houve um miss da cache, de qlqr modo, o pipe acha q nao havera jump
+			$('.p6').append('<div class="p6decodePredict-' + i + '">No jump</div>');
+			//console.log(herro);
+		}
+		
+		var fade_out = function() {
+			$(".p6decodePredict-" + i).fadeOut().remove();
+		}
+
+		setTimeout(fade_out, 940);
+	}
+	
+	this.renderBranch = function(instruction, i)
+	{
+		if(instruction && instruction.type === DATA_TYPES.CONTROL && instruction.executeMe && !instruction.renderAlreadyBranched)
+		{
+			if(instruction.btbResult === instruction.params.branchResult) ///acertei a predicao
+			{
+				$('.p6').append("<div class='rightBranch p6ExecuteBranch-" + i + "'>Correct</div>");
+			}
+			else
+			{
+				$('.p6').append("<div class='wrongBranch p6ExecuteBranch-" + i + "'>Misprediction</div>");
+			}
+			
+			var fade_out = function() {
+				$(".p6ExecuteBranch-" + i).fadeOut().remove();
+			}
+			setTimeout(fade_out, 950);
+			
+		}
 	}
 	
     const fetch = new P6PipelineStep("fetch", fetchExecution, { containerPipeline: containerPipeline });
@@ -312,6 +354,29 @@ function P6Pipe() {
 		// }
 		
 		//////end of pipeline flushing control //////////////////////
+		if (!execute.isEmpty())
+		{
+			execute.getStepInstructions().map((instruction, i) => {
+				if(instruction.type === DATA_TYPES.CONTROL && instruction.executeMe)
+				{
+					
+					SimplePipe.renderBranch(instruction, i);
+					instruction.renderAlreadyBranched = true;
+				}
+			});
+		}
+		
+		if (!decode.isEmpty())
+		{
+			decode.getStepInstructions().map((instruction, i) => {
+				if(instruction.type === DATA_TYPES.CONTROL && instruction.executeMe)
+				{
+					SimplePipe.renderPrediction(predictionAddr, i, instruction);
+					instruction.renderAlreadyPredicted = true;
+				}
+			});
+		}
+		
 //		console.log("flushControl: " + flushControl + " cycle: " + cycle + " stopFlushControl: " + stopFlushControl);
         //////branch & sequential pc control //////////////////////
         (function() {
@@ -395,9 +460,7 @@ function P6Pipe() {
 	}
 	
 	
-	
-	
-	
+
 	
 	////////////////end of class declaration ///////////////////////////////////////////////////////////////
     
