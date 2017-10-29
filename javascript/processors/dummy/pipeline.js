@@ -125,6 +125,44 @@ function DummyPipe() {
 	$(containerPipeline).append('<div class="fiveStepSeparator fiveStepLeft"></div>');
 	$(containerPipeline).append('<div class="fiveStepSeparator fiveStepRight"></div>');
 	
+	
+	this.renderPrediction = function(predictionAddr)
+	{
+		if(predictionAddr)
+		{//se houver um predictionAddr, houve uma previsao positiva
+			$('.container.pipeline.dummy').append("<div class='decodePredict positivePredict'>Jump to: " + predictionAddr +  "</div>");
+		}
+		else
+		{//se for undefined, ou previ falso ou houve um miss da cache, de qlqr modo, o pipe acha q nao havera jump
+			$('.container.pipeline.dummy').append("<div class='decodePredict'>No jump</div>");
+			//console.log(herro);
+		}
+		var fade_out = function() {
+			$(".decodePredict").fadeOut().remove();
+		}
+
+		setTimeout(fade_out, 1000);
+	}
+	
+	this.renderBranch = function(instruction)
+	{
+		if(instruction && instruction.type === DATA_TYPES.CONTROL && instruction.executeMe)
+		{
+			if(instruction.btbResult === instruction.params.branchResult) ///acertei a predicao
+			{
+				$('.container.pipeline.dummy').append("<div class='rightBranch dummyExecuteBranch'>Correct</div>");
+			}
+			else
+			{
+				$('.container.pipeline.dummy').append("<div class='wrongBranch dummyExecuteBranch'>Misprediction</div>");
+			}
+			var fade_out = function() {
+				$(".dummyExecuteBranch").fadeOut().remove();
+			}
+			setTimeout(fade_out, 950);
+		}
+	}
+	
 	this.init = function(dataMemory) {
 		SimplePipe.dataMemory = dataMemory;
     }
@@ -175,6 +213,10 @@ function DummyPipe() {
                 [predictionAddr, dhResult] = this.decode.execution(branchPredictor, dependencyHandler);
             }
 			this.decode.render("fetch", containerPipeline);
+			if(decodeI.type === DATA_TYPES.CONTROL && decodeI.executeMe)
+			{
+				SimplePipe.renderPrediction(predictionAddr);	
+			}
 		}
 		
 		if(executeI)
@@ -186,6 +228,10 @@ function DummyPipe() {
 //				console.log("executing execute");
 			}
 			this.execute.render("decode", containerPipeline);
+			if(executeI.type === DATA_TYPES.CONTROL && executeI.executeMe)
+			{
+				SimplePipe.renderBranch(executeI);	
+			}
 		}
 		
 		
