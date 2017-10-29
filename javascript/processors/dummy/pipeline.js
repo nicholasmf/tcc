@@ -213,10 +213,6 @@ function DummyPipe() {
                 [predictionAddr, dhResult] = this.decode.execution(branchPredictor, dependencyHandler);
             }
 			this.decode.render("fetch", containerPipeline);
-			if(decodeI.type === DATA_TYPES.CONTROL && decodeI.executeMe)
-			{
-				SimplePipe.renderPrediction(predictionAddr);	
-			}
 		}
 		
 		if(executeI)
@@ -228,10 +224,6 @@ function DummyPipe() {
 //				console.log("executing execute");
 			}
 			this.execute.render("decode", containerPipeline);
-			if(executeI.type === DATA_TYPES.CONTROL && executeI.executeMe)
-			{
-				SimplePipe.renderBranch(executeI);	
-			}
 		}
 		
 		
@@ -307,6 +299,17 @@ function DummyPipe() {
 		}
 		
 		//////end of pipeline flushing control //////////////////////
+		
+		
+		if(decodeI && decodeI.type === DATA_TYPES.CONTROL && decodeI.executeMe)
+		{
+				SimplePipe.renderPrediction(predictionAddr);	
+		}
+		if(executeI && executeI.type === DATA_TYPES.CONTROL && executeI.executeMe)
+		{
+			SimplePipe.renderBranch(executeI);	
+		}
+		
 //		console.log("flushControl: " + flushControl + " cycle: " + cycle + " stopFlushControl: " + stopFlushControl);
 		//////branch & sequential pc control //////////////////////
 		if(executeI && executeI.type === DATA_TYPES.CONTROL && executeI.executeMe/*(executeI.cycle === flushControl + 3 || flushControl === -5 || executeI.cycle === flushControl)*/ )
