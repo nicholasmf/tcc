@@ -377,26 +377,62 @@
 	z-index: -1;
 }
 .p6row0Height {
-	 top: 21%;
+	 top: 76%;
 }
 .p6row1Height {
-	 top: 21%;
+	 top: 38%;
 }
 .p6row2Height {
-	 top: 21%;
+	 top: 0%;
 }
 .p6StepDecodeGhost{
-	left: 90%;
+	left: 30%;
 } 
 .p6StepLoadGhost {
-	left: 90%;
+	left: 50%;
 }
 .p6StepExecuteGhost {
-	left: 90%;
+	left: 70%;
 }
 .p6StepStoreGhost {
 	left: 90%;
 }
 .p6StepFetchGhost {
-	left: 90%;
+	left: 10%;
+}
+
+.p6StepName{
+	z-index: -2;
+	position: absolute;
+	opacity: 0.15;
+	color: black;
+	font-size: 42px;
+}
+.p6Fetch {
+    left: 7%;
+	top: 34%;
+}
+.p6Decode {
+    left: 24%;
+    top: 34%;
+    font-size: 38px;
+}
+.p6Issue {
+    left: 47%;
+    top: 33%;
+}
+.p6Execution {
+    left: 66%;
+    top: 40%;
+    font-size: 22px;
+}
+.p6Buffer {
+    left: 79%;
+    top: 40%;
+    font-size: 22px;
+}
+.p6Retire {
+    left: 88%;
+    top: 38%;
+    font-size: 30px;
 }

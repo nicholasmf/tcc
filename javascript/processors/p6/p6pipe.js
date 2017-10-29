@@ -128,6 +128,20 @@ function P6Pipe() {
 	$('.p6').append('<div class="sixStepSeparator sixStepLeft"></div>');
 	$('.p6').append('<div class="sixStepSeparator sixStepRight"></div>');
 	$('.p6').append('<div class="sixStepSeparator sixStepMid"></div>');
+
+	var stepNameArr = ['p6StepDecodeGhost', 'p6StepLoadGhost', 'p6StepExecuteGhost', 'p6StepStoreGhost', 'p6StepFetchGhost'];
+	for(let i=0; i<3; i++)
+	{
+		for(let j=0; j<5; j++)
+		{
+			$('.p6').append('<div class="p6StepContainer ' + stepNameArr[j] + ' p6row' + i + 'Height"></div>');
+		}
+	}
+	var p6StepName = ['Fetch', 'Decode', 'Issue', 'Execution', 'Buffer', 'Retire'];
+	for(let j=0; j<6; j++)
+	{
+		$('.p6').append('<div class="p6StepName p6' + p6StepName[j] + '">' + p6StepName[j] + '</div>');
+	}
 	
     const fetch = new P6PipelineStep("fetch", fetchExecution, { containerPipeline: containerPipeline });
 	const decode = new P6PipelineStep("decode", decodeExecution, { containerPipeline: containerPipeline });

@@ -141,7 +141,7 @@ function DummyPipe() {
 			$(".decodePredict").fadeOut().remove();
 		}
 
-		setTimeout(fade_out, 1000);
+		setTimeout(fade_out, 940);
 	}
 	
 	this.renderBranch = function(instruction)
