@@ -25,6 +25,8 @@ function DummyPipe() {
 		let retArr = [];
 		let instruction = this.getStepInstruction();
 		if (instruction && dh) {
+			// If dh has rename, apply it
+			if (dh.rename) { dh.rename(instruction); }
 			retArr[1] = dh.insert(instruction);
 		}
 		else {
@@ -362,8 +364,10 @@ function DummyPipe() {
 		//////end of branch & sequential pc control //////////////////////
 		
 //		if(!stallDecode)
-			cycle++;
-		
+		cycle++;
+		// Updates html counter
+		$("#clockCounter span").text(cycle);
+
 //		console.log("pc: " + pc);
 		
 		if (!(fetchI || executeI || loadI || decodeI || storeI))

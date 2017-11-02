@@ -259,7 +259,8 @@ function Simulator() {
 			sim.architecture.pipeLoop(instructions, execution, sim.branchPredictor, sim.dependencyHandler);
 			
 			//console.log("gDI: " + sim.architecture.getDecodeInstruction().name);
-			//console.log("pc: " + pc + " LR: " + sim.fillNoop);            
+            //console.log("pc: " + pc + " LR: " + sim.fillNoop);
+            
         };
 		if (sim.timeInterval) {
 			execution = setInterval(sim.cicle , sim.timeInterval * 1000);

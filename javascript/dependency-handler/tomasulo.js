@@ -157,7 +157,7 @@ function RSHandler(size) {
     this.insert = function(instruction) {
         if (stations.getRS(instruction)) { return; }
         if (instruction === "NoOp") { return; }
-        rename(instruction, arf);
+        //rename(instruction, arf);
 
         if (instruction.type === DATA_TYPES.ARITHMETIC) {
             let source = isObject(instruction.params.source) ? instruction.params.source : undefined;
@@ -226,7 +226,7 @@ function RSHandler(size) {
         if (!rs) return;
         let dest = instruction.params.dest;
         if (isObject(dest)) {
-//            stations.update(dest);
+            stations.update(dest);
             let originalRegister = arf.remove(dest);
             if (originalRegister) originalRegister.set(dest.get());
         }
@@ -238,26 +238,38 @@ function RSHandler(size) {
         if (!rs) return;
         let dest = instruction.params.dest;
         if (isObject(dest)) {
-            stations.update(dest);
+            //stations.update(dest);
         }
     }
 
     this.remove = function(instruction) {
-        let rs = stations.getRS(instruction);
-        if (!rs) return;
-        let rsIndex = array.indexOf(rs);
-        array.splice(rsIndex, 1);
         let dest = instruction.params.dest;
         if (isObject(dest)) {
             let originalRegister = arf.remove(dest);
         }
+        let rs = stations.getRS(instruction);
+        if (!rs) return;
+        let rsIndex = array.indexOf(rs);
+        array.splice(rsIndex, 1);
         return true;        
+    }
+
+    this.rename = function(instruction) {
+        if (stations.getRS(instruction)) { return; }
+        if (instruction === "NoOp") { return; }
+
+        rename(instruction, arf);
     }
 }
 
 // Rename registers from instruction
+var renamedInstructions = [];
 function rename(instruction, arf) {
+    // Check if instruction has params
     if (!instruction.params) { return; }
+    // Verifies if instruction was already renamed
+    if (renamedInstructions.indexOf(instruction) > -1) { return; }
+    else { renamedInstructions.push(instruction); }
     let dest = isObject(instruction.params.dest) ? instruction.params.dest : undefined;
     let source = isObject(instruction.params.source) ? instruction.params.source : undefined;
     let source1 = isObject(instruction.params.source1) ? instruction.params.source1 : undefined;

@@ -127,6 +127,15 @@
     }
 }
 
+/************************* Cycles counter *****************/
+#clockCounter, #clockCounter span {
+    text-align: center;
+    width: 100vw;
+    font-size: 42px;
+    opacity: 0.7;
+    margin-top: 20px;
+}
+
 /************************ Data Memory *********************/
 #dataMemory {
     height: 180px;
@@ -137,6 +146,7 @@
 /*************************** Registers bank ***************/
 #registersContainer, #tempRegistersContainer {
     height: 100px;
+    width: auto;
     overflow-y: auto;
     overflow-x: hidden;
     padding-left: 15px;
@@ -467,4 +477,11 @@
 	position: absolute;
     left: 67%;
     top: 64%;
+}
+
+/******************************* Memory components **********************************************/
+.memory {
+    bottom: 0;
+    height: 45vh;
+    position: fixed;
 }

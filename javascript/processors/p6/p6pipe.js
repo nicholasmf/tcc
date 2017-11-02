@@ -32,12 +32,14 @@ function P6Pipe() {
     
         instructions.map(instruction => {
             if (!instruction.executeMe) { retArr[0].push(undefined); retArr[1].push(true); return; }
-            if (instruction && dh) {
-                retArr[1].push(dh.insert(instruction));
-            }
-            else {
-                retArr[1].push(true);
-            }
+            // if (instruction && dh) {
+            //     retArr[1].push(dh.insert(instruction));
+            // }
+            // else {
+            //     retArr[1].push(true);
+            // }
+            // If dh has renaming, apply it
+            if (dh && dh.rename) dh.rename(instruction);
             var btbResult;
             
             if(instruction && instruction.type === DATA_TYPES.CONTROL && !instruction.alreadyPredicted)//para verificar se ja previ o branch se ele ficar parado
@@ -57,8 +59,20 @@ function P6Pipe() {
         return retArr;
     }
     
-    function loadExecution() {
-    
+    function loadExecution(dh) {
+        let instructions = this.getStepInstructions();
+        let retArr = [];
+        instructions.map(instruction => {
+            if (!instruction.executeMe) { retArr.push(true); return; }
+            if (instruction && dh) {
+                retArr.push(dh.insert(instruction));
+            }
+            else {
+                retArr.push(true);
+            }
+        });
+
+        return retArr;
     }
     
     function executeExecution(branchPredictor, dh) {
@@ -72,8 +86,9 @@ function P6Pipe() {
             {
                 instruction.result = instruction.executethis();
                 //console.log("T0: ", instruction.params.dest);
+                instruction.params.dest.set(instruction.result);
             }
-            
+
             if (instruction && instruction.type === DATA_TYPES.CONTROL) {
                 if (instruction.name === "BRANCH IF ZERO") {
                     instruction.executethis();
@@ -81,7 +96,7 @@ function P6Pipe() {
                 }
             }
 
-            dh.execute(instruction);
+            if (dh) dh.execute(instruction);
         });
     }
     
@@ -91,10 +106,10 @@ function P6Pipe() {
     
         instructions.map(instruction => {
             if (!instruction.executeMe) { return; }
-            if(instruction && instruction.result != undefined && instruction.type === DATA_TYPES.ARITHMETIC)
-            {
-                instruction.params.dest.set(instruction.result);
-            }
+            // if(instruction && instruction.result != undefined && instruction.type === DATA_TYPES.ARITHMETIC)
+            // {
+            //     instruction.params.dest.set(instruction.result);
+            // }
             // Load and Store
             if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER) 
             {
@@ -219,25 +234,28 @@ function P6Pipe() {
         store.setStepInstruction( wbBuffer.execution() );
         wbBuffer.render("execute", containerPipeline);
         
-        execute.setStepInstruction( load.getNInstructions(execute.missingInstructions()) );
-        let nextLoadIns = undefined;
+        let nextExecIns = undefined;
         if (dependencyHandler) {
-            let executables = dependencyHandler.getExecutables( load.missingInstructions() );
+            let executables = dependencyHandler.getExecutables( execute.missingInstructions() );
 
+            // If is not waiting for any instruction, pass from load to execute
             if(executables.length === 1 && executables[0] === null) { 
-                nextLoadIns = decode.getNInstructions( load.missingInstructions() );
+                execute.setStepInstruction(load.getNInstructions( execute.missingInstructions() ));
             }
             else {
-                nextLoadIns = executables;
-                decode.getNInstructions(3, function(item) {
-                    return executables.indexOf(item) > -1;
+                // Pass all executable instructions or flushed instructions
+                nextExecIns = load.getNInstructions(3, function(item) {
+                    return executables.indexOf(item) > -1 || !item.executeMe;
                 });
+                execute.setStepInstruction( nextExecIns );
             }
         }
+        // If doesn't have dependency handler, pass from load to execute
         else {
-            nextLoadIns = decode.getNInstructions( load.missingInstructions() );
+            execute.setStepInstruction(load.getNInstructions( execute.missingInstructions() ));
         }
-        load.setStepInstruction( nextLoadIns );
+        //execute.setStepInstruction( nextExecIns );
+        load.setStepInstruction( decode.getNInstructions( load.missingInstructions() ) );
         decode.setStepInstruction( fetch.getNInstructions( decode.missingInstructions() ) );
         reorderBuffer.insertArray(decode.getStepInstructions());
 		pcOffset = fetch.missingInstructions();
@@ -259,13 +277,13 @@ function P6Pipe() {
 		if(!decode.isEmpty())
 		{	
 //                console.log("executing decode");
-            [predictionAddr, dhResult] = decode.execution(branchPredictor, dependencyHandler);
+            [predictionAddr] = decode.execution(branchPredictor, dependencyHandler);
 		}
         decode.render("fetch", containerPipeline);
 		
 		if(!load.isEmpty())
 		{
-            load.execution(pc);
+            dhResult = load.execution(dependencyHandler);
 //				console.log("executing load");
 			
         }
@@ -447,8 +465,9 @@ function P6Pipe() {
 // 		}
 		//////end of branch & sequential pc control //////////////////////
 		
-//		if(!stallDecode)
-			cycle++;
+        cycle++;
+		// Updates html counter
+		$("#clockCounter span").text(cycle);
 		
 //		console.log("pc: " + pc);
 		
