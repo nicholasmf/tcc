@@ -115,7 +115,7 @@ function DummyPipe() {
 	$("#pipelineDivGoesBeneath").append(containerPipeline);
 	
 	
-	var DummyNameArr = ['decode', 'load', 'execute', 'store', 'fetch'];
+	var DummyNameArr = ['decode', 'memr', 'execute', 'wback', 'fetch'];
 	var textIdentifierArr = ['dummyDecode', 'dummyLoad', 'DummyExecute', 'DummyStore', 'DummyFetch'];
 	for(let i=0; i<5; i++)
 	{
