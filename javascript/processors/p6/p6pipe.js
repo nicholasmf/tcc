@@ -75,7 +75,7 @@ function P6Pipe() {
         return retArr;
     }
     
-    function executeExecution(branchPredictor, dh) {
+    function executeExecution(dataMemory, branchPredictor, dh) {
         
         let instructions = this.getStepInstructions();
         instructions.map(instruction => {
@@ -86,7 +86,11 @@ function P6Pipe() {
             {
                 instruction.result = instruction.executethis();
                 //console.log("T0: ", instruction.params.dest);
-                instruction.params.dest.set(instruction.result);
+				if(dh.rename)
+				{
+					instruction.params.dest.set(instruction.result);
+				}
+                
             }
 
             if (instruction && instruction.type === DATA_TYPES.CONTROL) {
@@ -94,6 +98,11 @@ function P6Pipe() {
                     instruction.executethis();
                     branchPredictor.update(instruction.address, instruction.params.branchTo, instruction.params.branchResult);
                 }
+            }
+			
+			if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER && (instruction.name === 'LOAD' || instruction.name === 'LOADI'))
+            {
+                instruction.storeData = instruction.executethis(dataMemory);
             }
 
             if (dh) dh.execute(instruction);
@@ -106,14 +115,21 @@ function P6Pipe() {
     
         instructions.map(instruction => {
             if (!instruction.executeMe) { return; }
-            // if(instruction && instruction.result != undefined && instruction.type === DATA_TYPES.ARITHMETIC)
-            // {
-            //     instruction.params.dest.set(instruction.result);
-            // }
-            // Load and Store
+            if(instruction && instruction.result != undefined && instruction.type === DATA_TYPES.ARITHMETIC && !dh.rename)
+            {
+                instruction.params.dest.set(instruction.result);
+            }
+            //Load and Store
             if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER) 
             {
-                instruction.executethis(dataMemory);
+				if(isNumber(instruction.storeData))
+				{//is load instruction must write to register
+					instruction.params.dest.set(instruction.storeData);
+				}
+                else
+				{//is store, writes to memory
+					instruction.executethis(dataMemory);
+				}
             }
             if (instruction && dh) {
                 dh.wb(instruction);
@@ -273,7 +289,7 @@ function P6Pipe() {
 		executeI = execute.getStepInstructions();
 		storeI = store.getStepInstructions();		
 
-        //executo fetch, pois ele apenas pega a proxima instrucao da memoria
+       
 		if(!decode.isEmpty())
 		{	
 //                console.log("executing decode");
@@ -291,7 +307,7 @@ function P6Pipe() {
 		
 		if(!execute.isEmpty())
 		{
-            execute.execution(branchPredictor, dependencyHandler);
+            execute.execution(SimplePipe.dataMemory, branchPredictor, dependencyHandler);
 //				console.log("executing execute");
         }
         execute.render("load", containerPipeline);

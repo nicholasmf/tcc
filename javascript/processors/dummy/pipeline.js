@@ -50,8 +50,12 @@ function DummyPipe() {
 		return retArr;
 	}
 	
-	function loadExecution() {
-	
+	function loadExecution(dataMemory) {
+		let instruction = this.getStepInstruction();
+		if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER) 
+		{//accesses memory
+			instruction.storeData = instruction.executethis(dataMemory);
+		}
 	}
 	
 	function executeExecution(branchPredictor, dh) {
@@ -73,7 +77,7 @@ function DummyPipe() {
 		}
 	}
 	
-	function storeExecution(dataMemory, dh) {
+	function storeExecution(dh) {
 		
 		let instruction = this.getStepInstruction();
 		
@@ -82,11 +86,11 @@ function DummyPipe() {
 			instruction.params.dest.set(instruction.result);
 		}
 		// Load and Store
-		if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER) 
+		if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER && isNumber(instruction.storeData))
 		{
-			instruction.executethis(dataMemory);
+			instruction.params.dest.set(instruction.storeData);
 		}
-		if (instruction && dh) {
+		if (instruction && dh) {//so ativo no tomasulo e scoreboarding ('desrenomeia' e tira da espera)
 			dh.execute(instruction);
 			dh.wb(instruction);
 		}
@@ -239,7 +243,7 @@ function DummyPipe() {
 			
 			if(loadI.executeMe)
 			{
-				this.load.execution(pc);
+				this.load.execution(SimplePipe.dataMemory);
 //				console.log("executing load");
 			}
 			
@@ -250,7 +254,7 @@ function DummyPipe() {
 		{
 			if(storeI.executeMe)
 			{
-				this.store.execution(SimplePipe.dataMemory, dependencyHandler);
+				this.store.execution(dependencyHandler);
 //				console.log("executing store");
 			}
 			// else
