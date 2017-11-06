@@ -75,6 +75,8 @@ function DummyPipe() {
 				branchPredictor.update(instruction.address, instruction.params.branchTo, instruction.params.branchResult);
 			}
 		}
+
+		dh.execute(instruction);
 	}
 	
 	function storeExecution(dh) {
@@ -181,7 +183,7 @@ function DummyPipe() {
 	this.pipeLoop = function(instructions, loopControl, branchPredictor, dependencyHandler)
 	{
 //		console.log("/////////////////////////////////////////");
-        let dhRet = dependencyHandler ? dependencyHandler.getExecutables(1)[0] : null;
+		let dhRet = dependencyHandler ? dependencyHandler.getExecutables(1)[0] : null;
         let nextExecIns = dependencyHandler && decodeI ? ( dhRet === undefined ? new Instruction("NoOp") : dhRet === null ? decodeI : dhRet) : decodeI;
         if (decodeI && !decodeI.executeMe) { nextExecIns = decodeI; }
         else if (!dhResult) { nextExecIns = new Instruction("NoOp"); }

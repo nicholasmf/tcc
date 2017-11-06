@@ -176,11 +176,13 @@ function RSHandler(size) {
         }
         else if (instruction.type === DATA_TYPES.DATA_TRANSFER) {
             let a = instruction.params.address || instruction.params.value;
-            array.push(new RS(instruction, undefined, undefined, undefined, undefined, a));
+            let source = isObject(instruction.params.source) ? instruction.params.source : undefined;
+            let sourceVal = getValue(instruction.params.source);
+            array.push(new RS(instruction, source ? undefined : sourceVal, undefined, source, undefined, a));
         }
         else if (instruction.type === DATA_TYPES.CONTROL) {
             let source = isObject(instruction.params.source) ? instruction.params.source : undefined;
-            sourceVal = getValue(instruction.params.source);
+            let sourceVal = getValue(instruction.params.source);
 //            console.log(source, sourceVal);
             array.push(new RS(instruction, source ? undefined : sourceVal, undefined, source, undefined));
         }
@@ -214,7 +216,7 @@ function RSHandler(size) {
             if (count === n) { return false; }
             if (rs.isExecutable()) {
                 count++;
-                rs.setExecuting();
+                //rs.setExecuting();
                 return true;
             };
         }).map(rs => { return rs.getInstruction(); });
@@ -236,9 +238,12 @@ function RSHandler(size) {
     this.execute = function(instruction) {
         let rs = stations.getRS(instruction);
         if (!rs) return;
-        let dest = instruction.params.dest;
-        if (isObject(dest)) {
-            //stations.update(dest);
+        rs.setExecuting();
+        if (instruction && isNumber(instruction.result)) {
+            instruction.params.dest.set(instruction.result);
+        }
+        if (instruction && isNumber(instruction.storeData)) {
+            instruction.params.dest.set(instruction.storeData);
         }
     }
 
