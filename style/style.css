@@ -1,3 +1,7 @@
+nav {
+    padding: 10px;
+}
+
 /************************** Lists *******************/
 #instructions, #finalList {
     transition: 0.2s ease-in-out;
@@ -221,13 +225,14 @@
 
 /*creates 4 separators for pipes with 5 stages */ 
 .fiveStepSeparator {
-    border-left: 5px dotted #3333333b;
-    border-right: 5px dotted #3333333b;
+    border-left: 5px dotted #333333;
+    border-right: 5px dotted #333333;
     position: absolute;
     width: 20%;
     height: 90%;
     top: -8%;
     z-index: -1;
+    opacity: 0.15;
 }
 .fiveStepLeft {
     left: 22%;
@@ -281,7 +286,8 @@
 
 /*all stepContainers for all pipes are created equal */
 .fiveStepContainer {
-	border: 1px dashed #3333333b;
+    border: 1px dashed #333333;
+    opacity: 0.15;
     width: 42px;
     height: 42px;
     position: absolute;
@@ -359,7 +365,8 @@
 }
 /*creates 5 separators for pipes with 6 stages */ 
 .sixStepSeparator {
-    border-left: 5px dotted #3333333b;
+    border-left: 5px dotted #333333;
+    opacity: 0.15;
     position: absolute;
     height: 90%;
     top: 0%;
@@ -368,19 +375,22 @@
 .sixStepLeft {
     left: 23%;
 	width: 18%;
-	border-right: 5px dotted #3333333b;
+    border-right: 5px dotted #333333;
+    opacity: 0.15;
 }
 .sixStepRight{
     left: 78%;
     width: 9%;
-	border-right: 5px dotted #3333333b;
+    border-right: 5px dotted #333333;
+    opacity: 0.15;
 }
 .sixStepMid {
 	left: 65%;
 }
 /*end of creates 5 separators for pipes with 6 stages */
 .p6StepContainer {
-	border: 1px dashed #3333333b;
+    border: 1px dashed #333333;
+    opacity: 0.15;
     width: 42px;
     height: 42px;
     position: absolute;

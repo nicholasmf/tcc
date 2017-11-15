@@ -15,6 +15,7 @@ const V0 = simulator.registersArray[50];
 function start() {
 	//var architecture = new P5Pipe("");
     //var architecture = new P5Arq();
+    $("#pipelineDivGoesBeneath").empty();
     setPipe();
     setTimeInterval();
     setBP();

@@ -21,13 +21,14 @@ function ARF() {
 
     // Get correspondent temp of a register
     this.get = function(register) {
+        if (!register) return;
         let i = register.index;
         if (!memory[i]) { return undefined; }
         let last = memory[i].length - 1;
         return memory[i][last];
     }
 
-    // Remove temp register
+    // Remove temp register and return the original one
     this.remove = function(tempRegister) {
         var index = -1, tempIndex = -1, isLast = false;
         memory.forEach((item, i) => {
@@ -49,28 +50,10 @@ function ARF() {
     }
 }
 
-// // Physical register file - stores data
-// function PRF() {
-//     var size = 256;
-//     var memory = simulator.tempRegistersArray;
-//     var pos = 0;
-
-//     // Insert new register
-//     this.insert = function(value) {
-//         memory[pos++].set(value);
-//         return pos-1;
-//     }
-
-//     // Get register of address
-//     this.get = function(address) {
-//         return memory[address];
-//     }
-// }
-
 // Reservation Station
 function RS(ins, vj, vk, qj, qk, a) {
     var busy = false;
-    var Vj, Vk, Qj, Qk, A;
+    var Vj, Vk, Qj, Qk, A, result, originalDest;
     var instruction;
     var executing = false;
     // Init
@@ -81,6 +64,8 @@ function RS(ins, vj, vk, qj, qk, a) {
     Qj = qj;
     Qk = qk;
     A = a;
+
+    console.log('ins', ins.name, qj, qk);
 
     // Update
     this.update = function(vj, vk, qj, qk, a) {
@@ -137,6 +122,22 @@ function RS(ins, vj, vk, qj, qk, a) {
     this.getExecuting = function() {
         return executing;
     }
+
+    this.setResult = function(value) {
+        result = value;
+    }
+
+    this.getResult = function() {
+        return result;
+    }
+
+    this.setODest = function(register) {
+        originalDest = register;
+    }
+
+    this.getODest = function() {
+        return originalDest;
+    }
 }
 
 // Reservation stations handler
@@ -158,7 +159,7 @@ function RSHandler(size) {
         if (stations.getRS(instruction)) { return; }
         if (instruction === "NoOp") { return; }
         //rename(instruction, arf);
-
+        rename(instruction, arf);
         if (instruction.type === DATA_TYPES.ARITHMETIC) {
             let source = isObject(instruction.params.source) ? instruction.params.source : undefined;
             let source1 = isObject(instruction.params.source1) ? instruction.params.source1 : undefined;
@@ -228,16 +229,24 @@ function RSHandler(size) {
         if (!rs) return;
         let dest = instruction.params.dest;
         if (isObject(dest)) {
-            stations.update(dest);
-            let originalRegister = arf.remove(dest);
-            if (originalRegister) originalRegister.set(dest.get());
+        //     stations.update(dest);
+             let originalRegister = arf.remove(dest);
+             if (originalRegister) originalRegister.set(dest.get());
+        //    rs.getODest().set(rs.getResult());
         }
+        stations.remove(instruction);
         return true;
     }
 
     this.execute = function(instruction) {
         let rs = stations.getRS(instruction);
         if (!rs) return;
+        let dest = instruction.params.dest;
+        if (dest) { 
+            stations.update(dest);
+            dest.ready = true;
+            //rs.setODest(arf.remove(dest));
+        }
         rs.setExecuting();
         if (instruction && isNumber(instruction.result)) {
             instruction.params.dest.set(instruction.result);
@@ -256,14 +265,14 @@ function RSHandler(size) {
         if (!rs) return;
         let rsIndex = array.indexOf(rs);
         array.splice(rsIndex, 1);
-        return true;        
+        return true;
     }
 
     this.rename = function(instruction) {
         if (stations.getRS(instruction)) { return; }
         if (instruction === "NoOp") { return; }
 
-        rename(instruction, arf);
+        //rename(instruction, arf);
     }
 }
 
@@ -283,15 +292,18 @@ function rename(instruction, arf) {
     if (source) {
         let temp = arf.get(source);
 //        console.log(source, source.get(), temp || source.get());
-        instruction.params.source = temp || source.get();
+        if (temp.ready) instruction.params.source = temp.get();
+        else instruction.params.source = temp || source.get();
     }
     if (source1) {
         var temp = arf.get(source1);
-        instruction.params.source1 = temp || source1.get();
+        if (temp.ready) instruction.params.source1 = temp.get();
+        else instruction.params.source1 = temp || source1.get();
     }
     if (source2) {
         var temp = arf.get(source2);
-        instruction.params.source2 = temp || source2.get();
+        if (temp.ready) instruction.params.source2 = temp.get();
+        else instruction.params.source2 = temp || source2.get();
     }
     if (dest) {
         instruction.params.dest = arf.update(dest);

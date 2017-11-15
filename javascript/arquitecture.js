@@ -365,6 +365,9 @@ function P5Arq ()
 			console.log("pair: " + decodeI1.name + "/" + decodeI2.name + ": " + pairInstructions);
 		
 		cycle++;
+		// Updates html counter
+		$("#clockCounter span").text(cycle);
+				
 		
 	}	
 	
