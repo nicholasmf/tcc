@@ -151,7 +151,8 @@ function P6Pipe() {
 	var containerPipeline = $('<div class="container pipeline p6"></div>');
 	$("#pipelineDivGoesBeneath").append(containerPipeline);
 	
-	
+    console.log('teste');
+    
 	$('.p6').append('<div class="sixStepSeparator sixStepLeft"></div>');
 	$('.p6').append('<div class="sixStepSeparator sixStepRight"></div>');
 	$('.p6').append('<div class="sixStepSeparator sixStepMid"></div>');
@@ -253,11 +254,6 @@ function P6Pipe() {
                     nextIns = load.getStepInstructions().slice(0, execute.missingInstructions() );
                 }
                 else {
-                    // Pass all executable instructions or flushed instructions
-                    // nextIns = load.getNInstructions(3, function(item) {
-                    //     return executables.indexOf(item) > -1 || !item.executeMe;
-                    // });
-                    console.log(executables);
                     nextIns = executables;
                 }
             }
@@ -269,8 +265,6 @@ function P6Pipe() {
             let nextExecIns = nextIns.filter(item => { return item.type !== DATA_TYPES.DATA_TRANSFER; });
             // Get first memory instruction of the buffer
             let firstMemIns = memoryBuffer.getFirstN(1)[0];
-            if (firstMemIns)
-                console.log(firstMemIns.name, firstMemIns.address);
             // If first instruction is to be executed, add on the list of instructions to be executed
             if (nextIns.indexOf(firstMemIns) > -1) {
                 nextExecIns.push(firstMemIns);
