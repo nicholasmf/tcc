@@ -95,7 +95,7 @@ function P5Pipe(htmlClass) {
 		{//se o fetch estiver travado, mas eu mudei meu buffer e o fetch nao tem nada, devo executar mesmo assim
 			instruction[inBuffer.number] = pipeSim.fetchStep(pc, instructions);
 			if(instruction[inBuffer.number])
-			{
+			{//adiciono a classe depois do fetch pq a funcao nao recebe o numero do buffer e apenas retorna a instrucao
 				$('#entry-'+instruction[inBuffer.number].inOrder).addClass("buffer-"+inBuffer.number);
 			}
 			
@@ -269,7 +269,7 @@ function P5Pipe(htmlClass) {
 		//midCol.append(containerPipeline);
         //var pipeline = $('<div class="container pipeline">\n</div>');//$(".pipeline");	
         var instructionList = $("#instructions");
-        instructionList.children('.active').removeClass('active');
+        //instructionList.children('.active').removeClass('active');
         // if (pipeSim.fillNoop > 0) {
         //     var instructionElem = $("<div class='pipeline-item background-danger fetch'>NoOp</div>");
         //     setTimeout(function() {

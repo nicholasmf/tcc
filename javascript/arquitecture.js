@@ -52,6 +52,9 @@ function P5Arq ()
 		console.log("////////////////////////////////////////////////////////////////////////////////////////////////////////////");
 		console.log("ini pc: " + simArq.pc + " ini pcu: " + pcu + " ini pcv: " + pcv);
 		
+		var instructionList = $("#instructions");
+        instructionList.children('.active').removeClass('active');
+		
 		var pairInstructions;
 		
 		
@@ -123,7 +126,7 @@ function P5Arq ()
 		
 		//atribuicao de pc devido a branchs especulativos
 		
-		if (uPipeCycle[2])
+		if (uPipeCycle[2])//retorno de btbResult
 		{
 			console.log("btb has been updated from U");
 			inBuffer.number === 0 ? inBuffer.number = 1 : inBuffer.number = 0;
@@ -132,17 +135,14 @@ function P5Arq ()
 			
 			simArq.pc = uPipeCycle[2];
 			
-			/*attempts to create super buffer... still very dangerous
-			if( !uPipe.getFetchInstruction(inBuffer.number) && !vPipe.getFetchInstruction(inBuffer.number) )
-			{//se eu especular verdadeiro, devo me preparar para dar fetch nas instrucoes "longe", o buffer novo provavelmente estara vazio
-				uPipe.setFetchInstruction(instructions[simArq.pc], inBuffer.number);
-				pcu = simArq.pc++;
-				vPipe.setFetchInstruction(instructions[simArq.pc], inBuffer.number);
-				pcv = simArq.pc++;
-				updatePcInCheck = false;
-			}
-			*/
-			
+			//attempts to create super buffer... still very dangerous
+			//se eu especular verdadeiro, devo me preparar para dar fetch nas instrucoes "longe"
+			uPipe.setFetchInstruction(uPipe.fetchStep(simArq.pc, instructions), inBuffer.number);
+			//pcu = simArq.pc + 1;//nao dou pc++ pois o algoritmo de pareamento ira definir isso pra mim (meio q rodei fetch fora do lugar)
+			vPipe.setFetchInstruction(vPipe.fetchStep(simArq.pc + 1, instructions), inBuffer.number);//tem q ver se da pra rodar fetch de algum modo, la tem renders e o global entry order. Se der so um set, vai zoar um bando de coisa
+			$('#entry-'+uPipe.getFetchInstruction(inBuffer.number).inOrder).addClass("buffer-"+inBuffer.number);
+			$('#entry-'+vPipe.getFetchInstruction(inBuffer.number).inOrder).addClass("buffer-"+inBuffer.number);
+			simArq.pc+=2;
         }
 		else if (vPipeCycle[2])
 		{
@@ -153,16 +153,14 @@ function P5Arq ()
 
 			simArq.pc = vPipeCycle[2];
 			
-			/*attempts to create supper buffer... still very dangerous
-			if( !uPipe.getFetchInstruction(inBuffer.number) && !vPipe.getFetchInstruction(inBuffer.number) )
-			{//se eu especular verdadeiro, devo me preparar para dar fetch nas instrucoes "longe", o buffer novo provavelmente estara vazio
-				uPipe.setFetchInstruction(instructions[simArq.pc], inBuffer.number);
-				pcu = simArq.pc++;
-				vPipe.setFetchInstruction(instructions[simArq.pc], inBuffer.number);
-				pcv = simArq.pc++;
-				updatePcInCheck = false;
-			}
-			*/
+			//attempts to create super buffer... still very dangerous
+			//se eu especular verdadeiro, devo me preparar para dar fetch nas instrucoes "longe"
+			uPipe.setFetchInstruction(uPipe.fetchStep(simArq.pc, instructions), inBuffer.number);
+			//pcu = simArq.pc + 1;//nao dou pc++ pois o algoritmo de pareamento ira definir isso pra mim (meio q rodei fetch fora do lugar)
+			vPipe.setFetchInstruction(vPipe.fetchStep(simArq.pc + 1, instructions), inBuffer.number);
+			$('#entry-'+uPipe.getFetchInstruction(inBuffer.number).inOrder).addClass("buffer-"+inBuffer.number);
+			$('#entry-'+vPipe.getFetchInstruction(inBuffer.number).inOrder).addClass("buffer-"+inBuffer.number);
+			simArq.pc+=2;
 		}
 		
 		//preciso pegar a posicao pc de cada instrucao
