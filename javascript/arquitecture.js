@@ -123,6 +123,18 @@ function P5Arq ()
 		//var updatePcInCheck = true;
 		
 		simArq.fillNoop = uPipeCycle[1] || vPipeCycle[1];
+				
+		
+		if(simArq.fillNoop === 4)
+		{
+			['getLoadInstruction', 'getFetchInstruction', 'getDecodeInstruction'].map(step => {
+				var uIns = uPipe[step](inBuffer.number);
+				var vIns = vPipe[step](inBuffer.number);
+				if (uIns) { uIns.executeMe = false; }
+				if (vIns) { vIns.executeMe = false; }
+			});
+		}
+		
 		
 		//atribuicao de pc devido a branchs especulativos
 		

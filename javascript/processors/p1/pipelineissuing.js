@@ -20,9 +20,14 @@
 			console.log(instruction2.params.source);
 		console.log("fnop: " + fillNoop);
 		
+		console.log("EXECUTEME:", instruction1.executeMe, instruction2.executeMe);
 		
-		if(fillNoop > 0)
+		if(instruction1.executeMe && instruction2.executeMe)
+		{}//prevents pairing non flush instructions with flushing ones, should that happen
+		else if(!instruction1.executeMe && !instruction2.executeMe)
 			return true;
+		else
+			return false;
 		
 		//console.log(instruction1.name, instruction1.type);
 		//para parear instrucao1 nao pode ser um jump

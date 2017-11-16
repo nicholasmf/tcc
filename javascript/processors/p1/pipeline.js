@@ -42,7 +42,7 @@ function P5Pipe(htmlClass) {
 	}
 	
 	this.getLoadInstruction = function()
-	{
+	{//load step is decode2
 		return loadI;
 	}
 	
@@ -314,6 +314,7 @@ function P5Pipe(htmlClass) {
 
             //}, 60);//talvez nao precise de delay
 			instruction.inOrder = globalPipeInOrderEntry++;
+			instruction.executeMe = true;
             return instruction;//retorna a instrucao na posicao pc
         }
         else { 
