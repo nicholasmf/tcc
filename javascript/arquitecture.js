@@ -20,6 +20,9 @@ function P5Arq ()
 	var inBuffer = {number: 0, changedLastIter : false};
 	this.vPipeDo = {fetch:true, decode:true, load:true, execute:true, store:true};//poderia ser var...
 	this.uPipeDo = {fetch:true, decode:true, load:true, execute:true, store:true};
+	var lastPairing = false; //variavel que guarda o pareamento do ciclo anterior
+	var stall;
+	var pairInstructions;
 	
 	var substituteInstructionU = {Instruction:null, Place:null};
 	var substituteInstructionV = {Instruction:null, Place:null};
@@ -48,20 +51,17 @@ function P5Arq ()
 		$("#pipelineDivGoesBeneath").append('<div class="fiveStepText ' + textIdentifierArr[i] + '">'+ p5NameArr[i] + '</div>');
 	}
 	
-	this.pipeLoop = function(instructions, execution){
+	this.pipeLoop = function(instructions, execution, doNotUse, dh){
 		console.log("////////////////////////////////////////////////////////////////////////////////////////////////////////////");
 		console.log("ini pc: " + simArq.pc + " ini pcu: " + pcu + " ini pcv: " + pcv);
 		
 		var instructionList = $("#instructions");
         instructionList.children('.active').removeClass('active');
 		
-		var pairInstructions;
-		
-		
 		//embora os pipes U e V so comecem de fato na terceira etapa, a logica do programa divide as duas primeiras em dois tb
 		//O processador tem fetch e decode 1 em paralelo
-		var uPipeCycle = uPipe.p5cycle(simArq.BTB, instructions, pcu, execution, simArq.fillNoop, substituteInstructionU, simArq.uPipeDo, inBuffer, cycle, "Upipe: ");
-		var vPipeCycle = vPipe.p5cycle(simArq.BTB, instructions, pcv, execution, simArq.fillNoop, substituteInstructionV, simArq.vPipeDo, inBuffer, cycle, "Vpipe: ");
+		var uPipeCycle = uPipe.p5cycle(simArq.BTB, instructions, pcu, execution, simArq.fillNoop, substituteInstructionU, simArq.uPipeDo, inBuffer, cycle, "Upipe: ", dh);
+		var vPipeCycle = vPipe.p5cycle(simArq.BTB, instructions, pcv, execution, simArq.fillNoop, substituteInstructionV, simArq.vPipeDo, inBuffer, cycle, "Vpipe: ", dh);
 		substituteInstructionU.Instruction = null;
 		substituteInstructionU.Place = null;
 		substituteInstructionV.Instruction = null;
@@ -126,12 +126,20 @@ function P5Arq ()
 				
 		
 		if(simArq.fillNoop === 4)
-		{
+		{//se estiver dando flush, executeMe dessas 3 etapas deverao ser falsos
 			['getLoadInstruction', 'getFetchInstruction', 'getDecodeInstruction'].map(step => {
 				var uIns = uPipe[step](inBuffer.number);
 				var vIns = vPipe[step](inBuffer.number);
-				if (uIns) { uIns.executeMe = false; }
-				if (vIns) { vIns.executeMe = false; }
+				if (uIns) 
+				{ 
+					uIns.executeMe = false; 
+					dh.remove(uIns);
+				}
+				if (vIns)
+				{ 
+					vIns.executeMe = false;
+					dh.remove(vIns);
+				}
 			});
 		}
 		
@@ -150,7 +158,6 @@ function P5Arq ()
 			//attempts to create super buffer... still very dangerous
 			//se eu especular verdadeiro, devo me preparar para dar fetch nas instrucoes "longe"
 			uPipe.setFetchInstruction(uPipe.fetchStep(simArq.pc, instructions), inBuffer.number);
-			//pcu = simArq.pc + 1;//nao dou pc++ pois o algoritmo de pareamento ira definir isso pra mim (meio q rodei fetch fora do lugar)
 			vPipe.setFetchInstruction(vPipe.fetchStep(simArq.pc + 1, instructions), inBuffer.number);//tem q ver se da pra rodar fetch de algum modo, la tem renders e o global entry order. Se der so um set, vai zoar um bando de coisa
 			$('#entry-'+uPipe.getFetchInstruction(inBuffer.number).inOrder).addClass("buffer-"+inBuffer.number);
 			$('#entry-'+vPipe.getFetchInstruction(inBuffer.number).inOrder).addClass("buffer-"+inBuffer.number);
@@ -168,13 +175,55 @@ function P5Arq ()
 			//attempts to create super buffer... still very dangerous
 			//se eu especular verdadeiro, devo me preparar para dar fetch nas instrucoes "longe"
 			uPipe.setFetchInstruction(uPipe.fetchStep(simArq.pc, instructions), inBuffer.number);
-			//pcu = simArq.pc + 1;//nao dou pc++ pois o algoritmo de pareamento ira definir isso pra mim (meio q rodei fetch fora do lugar)
 			vPipe.setFetchInstruction(vPipe.fetchStep(simArq.pc + 1, instructions), inBuffer.number);
 			$('#entry-'+uPipe.getFetchInstruction(inBuffer.number).inOrder).addClass("buffer-"+inBuffer.number);
 			$('#entry-'+vPipe.getFetchInstruction(inBuffer.number).inOrder).addClass("buffer-"+inBuffer.number);
 			simArq.pc+=2;
 		}
 		
+		
+		
+		console.log("upipeLoad ", uPipe.getLoadInstruction());
+		if(uPipe.getLoadInstruction() && uPipe.getLoadInstruction().executeMe)
+		{
+			console.log("LAST PAIRING:", lastPairing, dh.getExecutablesCount());
+			if(dh.getExecutablesCount() === undefined)
+			{
+				dh.getExecutables(2);
+				stall = false;
+			}
+			else if(lastPairing && dh.getExecutablesCount() !== 2)
+			{//se pareou no ciclo anterior
+				//stall = true
+				simArq.uPipeDo.fetch = simArq.uPipeDo.decode = simArq.uPipeDo.load = false;
+				simArq.uPipeDo.execute = simArq.uPipeDo.store = true;
+				simArq.vPipeDo.fetch = simArq.vPipeDo.decode = simArq.vPipeDo.load = false;
+				simArq.vPipeDo.execute = simArq.vPipeDo.store = true;
+				stall = true;
+			}
+			else if (!lastPairing && dh.getExecutablesCount() < 1)
+			{
+				//stall = true
+				simArq.uPipeDo.fetch = simArq.uPipeDo.decode = simArq.uPipeDo.load = false;
+				simArq.uPipeDo.execute = simArq.uPipeDo.store = true;
+				simArq.vPipeDo.fetch = simArq.vPipeDo.decode = simArq.vPipeDo.load = false;
+				simArq.vPipeDo.execute = simArq.vPipeDo.store = true;
+				stall = true;
+			}
+			else
+			{
+				dh.getExecutables(2);
+				stall = false;
+			}
+		}
+		else
+		{
+			stall = false;
+		}
+		console.log("STALL: ", stall);
+		
+		
+		if(!stall){
 		//preciso pegar a posicao pc de cada instrucao
 		if(decodeI1 && decodeI2) {//se tiver 2 instrucoes em decode, verifico pareamento
 			console.log("decode1: " + decodeI1.address +  " decode2: " + decodeI2.address);
@@ -190,15 +239,16 @@ function P5Arq ()
 						
 						if(simArq.pc !=-1)//evitar pau na condicao de parada
 						{
-							//if(updatePcInCheck)
-								pcu = simArq.pc++;//sempre atualizo pcu nesse caso, mas devo verificar um caso especial para pcv
-							if(!simArq.vPipeDo.fetch && inBuffer.changedLastIter && !vPipe.getFetchInstruction[inBuffer.number])
-								pcv = simArq.pc++;//devo pegar a proxima instrucao em fetch especulado, se nao fizer isso pego sequencial
+							if(!stall)
+							{
+									pcu = simArq.pc++;//sempre atualizo pcu nesse caso, mas devo verificar um caso especial para pcv
+								if(!simArq.vPipeDo.fetch && inBuffer.changedLastIter && !vPipe.getFetchInstruction[inBuffer.number])
+									pcv = simArq.pc++;//devo pegar a proxima instrucao em fetch especulado, se nao fizer isso pego sequencial
+								
+								substituteInstructionV.Instruction = undefined; //a lacuna
+								substituteInstructionV.Place = "load";//executo e coloco
+							}
 						}
-						
-						// substituteInstructionV.Instruction = new Instruction("NoOp"); //a lacuna
-						// substituteInstructionV.Place = "load";//executo e coloco
-						// substituteInstructionV.
 						
 					}
 					else
@@ -207,11 +257,11 @@ function P5Arq ()
 						simArq.vPipeDo.fetch = simArq.vPipeDo.decode = simArq.vPipeDo.load = simArq.vPipeDo.execute = simArq.vPipeDo.store = true;
 						if(simArq.pc !=-1)//evitar pau na condicao de parada
 						{
-							//if(updatePcInCheck)
-							//{
+							if(!stall)
+							{
 								pcu = simArq.pc++;
 								pcv = simArq.pc++;
-							//}
+							}
 						}
 
 					}
@@ -230,21 +280,24 @@ function P5Arq ()
 					if(pairInstructions)
 					{//devo parear instrucoes, mas estao em decodes trocados
 						//troco as instrucoes em decode de cada pipe com o outro e avanco as etapas (na proxima iteracao); posso avancar pc em 1
-						substituteInstructionU.Instruction = vPipe.getDecodeInstruction();
-						substituteInstructionV.Instruction = uPipe.getDecodeInstruction();
-						substituteInstructionU.Place = "load";//apenas troco
-						substituteInstructionV.Place = "load";
-						
+						if(!stall)
+						{
+							
+							substituteInstructionU.Instruction = vPipe.getDecodeInstruction();
+							substituteInstructionV.Instruction = uPipe.getDecodeInstruction();
+							substituteInstructionU.Place = "load";//apenas troco
+							substituteInstructionV.Place = "load";
+						}
 						simArq.uPipeDo.fetch = simArq.uPipeDo.decode = simArq.uPipeDo.load = simArq.uPipeDo.execute = simArq.uPipeDo.store = true;
 						simArq.vPipeDo.fetch = simArq.vPipeDo.decode = simArq.vPipeDo.load = simArq.vPipeDo.execute = simArq.vPipeDo.store = true;
 						
 						if(simArq.pc !=-1)//evitar pau na condicao de parada
 						{
-							//if(updatePcInCheck)
-							//{
+							if(!stall)
+							{
 								pcu = simArq.pc++;
-								pcv = simArq.pc++;		
-							//}
+								pcv = simArq.pc++;
+							}								
 						}
 					}
 					else
@@ -254,20 +307,23 @@ function P5Arq ()
 						simArq.vPipeDo.fetch = simArq.vPipeDo.decode = simArq.vPipeDo.load = simArq.vPipeDo.execute = simArq.vPipeDo.store = true;
 						simArq.uPipeDo.fetch = simArq.uPipeDo.decode = false;
 						simArq.uPipeDo.load = simArq.uPipeDo.execute = simArq.uPipeDo.store = true;
-						
-						substituteInstructionU.Instruction = vPipe.getDecodeInstruction();//executo as 3 etapas finais e troco
-						substituteInstructionU.Place = "load";
-						substituteInstructionV.Instruction = new Instruction("NoOp"); //a lacuna
-						substituteInstructionV.Place = "load";
-						//console.log("simArq.pc: " + simArq.pc);
+						if(!stall)
+						{
+							substituteInstructionU.Instruction = vPipe.getDecodeInstruction();//executo as 3 etapas finais e troco
+							substituteInstructionU.Place = "load";
+							substituteInstructionV.Instruction = undefined; //a lacuna
+							substituteInstructionV.Place = "load";
+							//console.log("simArq.pc: " + simArq.pc);
+						}
 						if(simArq.pc !=-1)//evitar pau na condicao de parada
 						{
-							//console.log("if do pareamento: ", simArq.pc, inBuffer.changedLastIter, uPipe.getFetchInstruction[inBuffer.number], inBuffer.number);
-							if(!simArq.uPipeDo.fetch && inBuffer.changedLastIter && !uPipe.getFetchInstruction[inBuffer.number])
-								pcu = simArq.pc++;//devo pegar a proxima instrucao em fetch especulado, se nao fizer isso pego sequencial
-							//if(updatePcInCheck)
-								pcv = simArq.pc++;
-								//console.log("rodei o pc");
+							if(!stall)
+							{
+								if(!simArq.uPipeDo.fetch && inBuffer.changedLastIter && !uPipe.getFetchInstruction[inBuffer.number])
+									pcu = simArq.pc++;//devo pegar a proxima instrucao em fetch especulado, se nao fizer isso pego sequencial
+
+									pcv = simArq.pc++;
+							}
 						}
 
 					}
@@ -304,7 +360,7 @@ function P5Arq ()
 				{//nao tem nada em decode U, mas tem em decode V (acontece no final do programa e em alguns casos especiais)
 					substituteInstructionU.Instruction = vPipe.getDecodeInstruction();//devo mandar para o U pipe; avanco os dois normalmente
 					substituteInstructionU.Place = "load";
-					substituteInstructionV.Instruction = new Instruction("NoOp");
+					substituteInstructionV.Instruction = undefined;
 					substituteInstructionV.Place = "load";
 				}
 			}
@@ -312,10 +368,16 @@ function P5Arq ()
 			//de qlqr modo, os pipes avancarao completamente
 			simArq.uPipeDo.fetch = simArq.uPipeDo.decode = simArq.uPipeDo.load = simArq.uPipeDo.execute = simArq.uPipeDo.store = true;
 			simArq.vPipeDo.fetch = simArq.vPipeDo.decode = simArq.vPipeDo.load = simArq.vPipeDo.execute = simArq.vPipeDo.store = true;
-			pcu = simArq.pc++;
-			pcv = simArq.pc++;
+			if(!stall)
+			{
+				pcu = simArq.pc++;
+				pcv = simArq.pc++;	
+			}
 		}
-
+		}
+		
+		
+		lastPairing = pairInstructions; //guarda o pareamento do ciclo anterior
 		
 		//atualizacoes de pc devido a branchs
 		if (uPipeCycle[0].pc != null && uPipeCycle[0].pc != undefined)

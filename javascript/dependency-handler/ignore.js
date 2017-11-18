@@ -32,10 +32,11 @@ function StallHandler() {
     }
     // Returns number of arrays that can be executed
     this.getExecutablesCount = function() {
+		//console.log("ARR L:", array.length);
         let retArr = [];
         if (!array.length) { return undefined;}
         var available = array.filter(item => { return item.status === 0 });
-        if (!available) { return undefined; }
+        if (!available.length) { return undefined; }
         available.map(item => {
             let index = array.indexOf(item);
             for (let i = index - 1; i >= 0; i--) {
@@ -59,7 +60,8 @@ function StallHandler() {
     }
     this.remove = function(instruction) {
         let i = array.find(item => {return item.instruction === instruction});
-        let index = array.indexOf(i);
+        //console.log(instruction, i);
+		let index = array.indexOf(i);
         if (index > -1 )
             array.splice(index, 1);
         return true;        

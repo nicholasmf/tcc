@@ -184,7 +184,8 @@ function Simulator() {
     }
 
     this.resume = function() {
-        if (sim.timeInterval) {
+		sim.cicle();
+        if (sim.timeInterval && !execution) {
             execution = setInterval(sim.cicle , sim.timeInterval * 1000);
         }
     }
@@ -192,6 +193,7 @@ function Simulator() {
     this.stop = function() {
         if (execution) {
             clearInterval(execution);
+			execution = undefined;
         }
     }
 

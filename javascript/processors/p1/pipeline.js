@@ -75,7 +75,7 @@ function P5Pipe(htmlClass) {
 	*/
 	
 	//pipeName eh so para funs de debug
-	this.p5cycle = function(BTB, instructions, pc, execution, fillNoop, substituteInstruction, pipeDo, inBuffer, cycle, pipeName) {	
+	this.p5cycle = function(BTB, instructions, pc, execution, fillNoop, substituteInstruction, pipeDo, inBuffer, cycle, pipeName, dh) {	
 
 		pipeSim.fillNoop = fillNoop;
 		correctlyPredictedYes = false;
@@ -85,8 +85,13 @@ function P5Pipe(htmlClass) {
 		
 		if(pipeDo.execute)
 			storeI = executeI;
+
 		if(pipeDo.load)
 			executeI = loadI;
+		else
+		{
+			executeI = undefined;
+		}
 		
 		if(pipeDo.decode)
 			loadI = decodeI;
@@ -97,8 +102,7 @@ function P5Pipe(htmlClass) {
 			if(instruction[inBuffer.number])
 			{//adiciono a classe depois do fetch pq a funcao nao recebe o numero do buffer e apenas retorna a instrucao
 				$('#entry-'+instruction[inBuffer.number].inOrder).addClass("buffer-"+inBuffer.number);
-			}
-			
+			}	
 		}
 		
 		if(pipeDo.fetch)
@@ -190,7 +194,7 @@ function P5Pipe(htmlClass) {
 		{
 			if(loadI)
 			{
-				console.log("substituting in load step " + loadI.name + " in " + pipeName + "for " + substituteInstruction.Instruction.name);
+				//console.log("substituting in load step " + loadI.name + " in " + pipeName + "for " + substituteInstruction.Instruction.name);
 			}
 				loadI = substituteInstruction.Instruction;
 				//substitution.load = true;
@@ -206,13 +210,13 @@ function P5Pipe(htmlClass) {
 		if(pipeDo.load)
 		{
 			console.log("executing " + pipeName + "load");
-			pipeSim.load(substituteInstruction, loadI);
+			pipeSim.load(substituteInstruction, loadI, dh);
 		}
 			
 		if(pipeDo.store)
 		{
 			console.log("executing " + pipeName + "store");
-			pipeSim.store(storeI, lastResult);
+			pipeSim.store(storeI, lastResult, dh);
 		}
 			
 		if(pipeDo.execute)
@@ -346,7 +350,7 @@ function P5Pipe(htmlClass) {
 				
     }
 
-    this.load = function(substituteInstruction, instruction) {
+    this.load = function(substituteInstruction, instruction, dh) {
 		//var elem = containerPipeline.children(".decode:eq(0)");
         if (instruction) {
 			var auxSubstI = {Place: substituteInstruction.Place, Instruction: substituteInstruction.Instruction };
@@ -375,6 +379,15 @@ function P5Pipe(htmlClass) {
                 elem.removeClass("decode");//muda as caracteristicas do html pra passar cada bloquinho para a proxima etapa(idem ao anterior)
                 elem.addClass("load");
             }, 100);
+			
+			if(auxSubstI.Place == 'load')
+			{
+				dh.insert(substituteInstruction.Instruction);
+			}
+			else
+			{
+				dh.insert(instruction);
+			}
         }
     }
 
@@ -424,13 +437,18 @@ function P5Pipe(htmlClass) {
 				//devo invalidar o buffer q nao estou mais usando
 					correctlyPredictedYes = true;
 				}
-			}	
+			}
+			if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER) 
+			{//accesses memory
+				instruction.storeData = instruction.executethis(pipeSim.dataMemory);
+			}			
 		}
 
         return result;
     }
 
-    this.store = function(instruction, result) {
+    this.store = function(instruction, result, dh) {
+		console.log("STORE:", instruction);
         var count =  containerPipeline.children(".execute").length;
         var elem = containerPipeline.children(".execute:eq(0)");
         if (count) {
@@ -446,12 +464,19 @@ function P5Pipe(htmlClass) {
                 instruction.params.dest.set(result.ula);
             }
 			// Load and Store
-			console.log("instruction && instruction.type === DATA_TYPES.DATA_TRANSFER", instruction)
-            if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER) 
-            {
-                instruction.executethis(pipeSim.dataMemory);
-            }
+			//console.log("instruction && instruction.type === DATA_TYPES.DATA_TRANSFER", instruction)
+            //if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER) 
+            //{
+            //   instruction.executethis(pipeSim.dataMemory);
+            //}
+			// Load and Store
+			if(instruction && instruction.type === DATA_TYPES.DATA_TRANSFER && isNumber(instruction.storeData))
+			{
+				instruction.params.dest.set(instruction.storeData);
+			}
         }
+		
+		dh.remove(instruction);
     }
 
     this.end = function(interval, pc) {
