@@ -33,8 +33,9 @@ function StallHandler() {
     // Returns number of arrays that can be executed
     this.getExecutablesCount = function() {
         let retArr = [];
+        if (!array.length) { return undefined;}
         var available = array.filter(item => { return item.status === 0 });
-        if (!available) { return 0; }
+        if (!available) { return undefined; }
         available.map(item => {
             let index = array.indexOf(item);
             for (let i = index - 1; i >= 0; i--) {
