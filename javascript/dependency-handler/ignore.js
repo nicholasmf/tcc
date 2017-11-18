@@ -30,8 +30,13 @@ function StallHandler() {
             return retArr;
         }
     }
+    // Returns number of arrays that can be executed
+    this.getExecutablesCount = function() {
+        return array.filter(item => { return item.status === 0 }).length;
+    }
     this.execute = function(instruction) {
-        
+        let i = array.find(item => {return item.instruction === instruction && item.status === 1});
+        i.status = 1;
     }
     this.wb = function(instruction) {
         let i = array.find(item => {return item.instruction === instruction && item.status === 1});
