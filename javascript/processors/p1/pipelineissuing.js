@@ -20,7 +20,7 @@
 			console.log(instruction2.params.source);
 		console.log("fnop: " + fillNoop);
 		
-		console.log("EXECUTEME:", instruction1.executeMe, instruction2.executeMe);
+		//console.log("EXECUTEME:", instruction1.executeMe, instruction2.executeMe);
 		
 		if(instruction1.executeMe && instruction2.executeMe)
 		{}//prevents pairing non flush instructions with flushing ones, should that happen
@@ -38,6 +38,7 @@
 		}
 		
 		//verificar condicoes de disputa (rule 2)
+		/*
 		if(instruction1.params.dest !== undefined && typeof instruction1.params.dest === 'object')//se nao for objeto, nao eh registrador
 		{
 			if(instruction2.params.dest !== undefined && typeof instruction2.params.dest === 'object')//se nao for objeto, nao eh registrador
@@ -67,7 +68,14 @@
 				return true;
 			}
 		}
+		
 		else
 			return true;//else, a instrucao 1 nao tem destino
+		*/
+		if(checkRaW(instruction1, instruction2))
+		{
+			return false;
+		}
+		return !checkWaW(instruction1, instruction2);
 	}
 //}

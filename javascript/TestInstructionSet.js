@@ -21,7 +21,7 @@ TestInstructionSet.LOADI = function(dest, value)
 {
     return new Instruction("LOADI", DATA_TYPES.DATA_TRANSFER, null, {dest: dest, value: value}, true, function() 
     {
-        this.params.dest.set(value);
+        //this.params.dest.set(value);
 		return value;
     });
 }

@@ -61,6 +61,7 @@ function P5Arq ()
 		//embora os pipes U e V so comecem de fato na terceira etapa, a logica do programa divide as duas primeiras em dois tb
 		//O processador tem fetch e decode 1 em paralelo
 		var uPipeCycle = uPipe.p5cycle(simArq.BTB, instructions, pcu, execution, simArq.fillNoop, substituteInstructionU, simArq.uPipeDo, inBuffer, cycle, "Upipe: ", dh);
+		//simArq.fillNoop = uPipeCycle[1];
 		var vPipeCycle = vPipe.p5cycle(simArq.BTB, instructions, pcv, execution, simArq.fillNoop, substituteInstructionV, simArq.vPipeDo, inBuffer, cycle, "Vpipe: ", dh);
 		substituteInstructionU.Instruction = null;
 		substituteInstructionU.Place = null;
@@ -89,17 +90,50 @@ function P5Arq ()
 			{//se nao tiver nada em fetch no pipe u, ele ja foi invalidado e devo invalidar o buffer do outro pipe (lembrando q oficialmente ainda nao troquei o buffer)
 				console.log("nothing in u pipe");
 				if(inBuffer.number === 0)
+				{
+					
+					if(vPipe.getFetchInstruction(1))
+					{
+						var elem = $('#entry-' + vPipe.getFetchInstruction(1).inOrder);
+						elem.detach();
+					}
 					vPipe.setFetchInstruction(undefined, 1);
+				}
+					
 				else
+				{
+					if(vPipe.getFetchInstruction(0))
+					{
+						var elem = $('#entry-' + vPipe.getFetchInstruction(0).inOrder);
+						elem.detach();
+					}
 					vPipe.setFetchInstruction(undefined, 0);
+				}
+					
 			}
 			else if(vPipe.getFetchInstruction(bufferAux) === undefined)
 			{
 				console.log("nothing in v pipe");
 				if(inBuffer.number === 0)
+				{
+					if(uPipe.getFetchInstruction(1))
+					{
+						var elem = $('#entry-' + uPipe.getFetchInstruction(1).inOrder);
+						elem.detach();
+					}
 					uPipe.setFetchInstruction(undefined, 1);
+				}
+					
 				else
+				{
+					if(uPipe.getFetchInstruction(0))
+					{
+						var elem = $('#entry-' + uPipe.getFetchInstruction(0).inOrder);
+						elem.detach();
+					}
 					uPipe.setFetchInstruction(undefined, 0);
+				}
+					
 			}
 			
 			if(uPipeCycle[3])
@@ -112,7 +146,7 @@ function P5Arq ()
 					{//verificacao para saber se as instrucoes tem endereco valido (a q esta em exec deveria ter, ela eh um branch)
 						if(uLoadI.address === uExecI.address + 1)
 						{
-							uPipe.setLoadInstruction(new Instruction("NoOp"));
+							uPipe.setLoadInstruction(undefined);
 						}
 					}
 				}
@@ -141,6 +175,9 @@ function P5Arq ()
 					dh.remove(vIns);
 				}
 			});
+			
+			$(".fetch,.decode,.load").not(".background-danger").removeClass("background-info");
+			$(".fetch,.decode,.load").not(".background-danger").addClass("background-disabled");
 		}
 		
 		
@@ -150,6 +187,23 @@ function P5Arq ()
 		{
 			console.log("btb has been updated from U");
 			inBuffer.number === 0 ? inBuffer.number = 1 : inBuffer.number = 0;
+			var querySelectorStringU = "#" + pipeName[0] + "Id";
+			var querySelectorStringV = "#" + pipeName[1] + "Id";
+			if(inBuffer.number === 0)
+			{//troquei meu buffer ativo para o 0
+				$(querySelectorStringU).children('.activeBuffer').remove();
+				$(querySelectorStringU).append('<div class="activeBuffer p5Buffer-0 fiveStepFetchGhost"></div>');
+				$(querySelectorStringV).children('.activeBuffer').remove();
+				$(querySelectorStringV).append('<div class="activeBuffer p5Buffer-0 fiveStepFetchGhost"></div>');
+			}
+			else
+			{//meu buffer atual eh 1
+				$(querySelectorStringU).children('.activeBuffer').remove();
+				$(querySelectorStringU).append('<div class="activeBuffer p5Buffer-1 fiveStepFetchGhost"></div>');
+				$(querySelectorStringV).children('.activeBuffer').remove();
+				$(querySelectorStringV).append('<div class="activeBuffer p5Buffer-1 fiveStepFetchGhost"></div>');
+			}
+				
 			inBuffer.changedLastIter = true;//prevejo sim, sempre mudo buffer
 			console.log("buffer is now: " + inBuffer.number);
 			
@@ -167,6 +221,22 @@ function P5Arq ()
 		{
 			console.log("btb has been updated from V");
 			inBuffer.number === 0 ? inBuffer.number = 1 : inBuffer.number = 0;
+			var querySelectorStringU = "#" + pipeName[0] + "Id";
+			var querySelectorStringV = "#" + pipeName[1] + "Id";
+			if(inBuffer.number === 0)
+			{//troquei meu buffer ativo para o 0
+				$(querySelectorStringU).children('.activeBuffer').remove();
+				$(querySelectorStringU).append('<div class="activeBuffer p5Buffer-0 fiveStepFetchGhost"></div>');
+				$(querySelectorStringV).children('.activeBuffer').remove();
+				$(querySelectorStringV).append('<div class="activeBuffer p5Buffer-0 fiveStepFetchGhost"></div>');
+			}
+			else
+			{//meu buffer atual eh 1
+				$(querySelectorStringU).children('.activeBuffer').remove();
+				$(querySelectorStringU).append('<div class="activeBuffer p5Buffer-1 fiveStepFetchGhost"></div>');
+				$(querySelectorStringV).children('.activeBuffer').remove();
+				$(querySelectorStringV).append('<div class="activeBuffer p5Buffer-1 fiveStepFetchGhost"></div>');
+			}
 			inBuffer.changedLastIter = true;
 			console.log("buffer is now: " + inBuffer.number);
 
@@ -426,6 +496,22 @@ function P5Arq ()
 				else
 				{
 					inBuffer.number === 0 ? inBuffer.number = 1 : inBuffer.number = 0;
+					var querySelectorStringU = "#" + pipeName[0] + "Id";
+					var querySelectorStringV = "#" + pipeName[1] + "Id";
+					if(inBuffer.number === 0)
+					{//troquei meu buffer ativo para o 0
+						$(querySelectorStringU).children('.activeBuffer').remove();
+						$(querySelectorStringU).append('<div class="activeBuffer p5Buffer-0 fiveStepFetchGhost"></div>');
+						$(querySelectorStringV).children('.activeBuffer').remove();
+						$(querySelectorStringV).append('<div class="activeBuffer p5Buffer-0 fiveStepFetchGhost"></div>');
+					}
+					else
+					{//meu buffer atual eh 1
+						$(querySelectorStringU).children('.activeBuffer').remove();
+						$(querySelectorStringU).append('<div class="activeBuffer p5Buffer-1 fiveStepFetchGhost"></div>');
+						$(querySelectorStringV).children('.activeBuffer').remove();
+						$(querySelectorStringV).append('<div class="activeBuffer p5Buffer-1 fiveStepFetchGhost"></div>');
+					}
 					inBuffer.changedLastIter = true;
 					console.log("mistakes were made, buffer is now: " + inBuffer.number);
 				}
@@ -442,7 +528,8 @@ function P5Arq ()
 		// Updates html counter
 		$("#clockCounter span").text(cycle);
 				
-		
+		if( uPipe.getPipeEnd() && vPipe.getPipeEnd() )//se meu pipe estiver vazio depois de uma execucao, encerro
+			clearInterval(execution);
 	}	
 	
 }
