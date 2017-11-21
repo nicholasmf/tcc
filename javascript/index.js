@@ -16,7 +16,10 @@ function start() {
 	//var architecture = new P5Pipe("");
     //var architecture = new P5Arq();
     $("#pipelineDivGoesBeneath").empty();
-    setPipe();
+    var val = $("#selectPipe").val();
+    if (val === "dummy") pipe = new DummyPipe();
+    if (val === "p5") pipe = new P5Arq();
+    if (val === "p6") pipe = new P6Pipe();
     setTimeInterval();
     setBP();
     setDH();
