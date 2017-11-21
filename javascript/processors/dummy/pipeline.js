@@ -26,7 +26,7 @@ function DummyPipe() {
 		let instruction = this.getStepInstruction();
 		if (instruction && dh) {
 			// If dh has rename, apply it
-			if (dh.rename) { dh.rename(instruction); }
+			//if (dh.rename) { dh.rename(instruction); }
 			retArr[1] = dh.insert(instruction);
 		}
 		else {

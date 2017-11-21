@@ -65,8 +65,6 @@ function RS(ins, vj, vk, qj, qk, a) {
     Qk = qk;
     A = a;
 
-    console.log('ins', ins.name, qj, qk);
-
     // Update
     this.update = function(vj, vk, qj, qk, a) {
         if (vj) Vj = vj;
@@ -157,7 +155,7 @@ function RSHandler(size) {
     // Insert a instruction on reservation stations
     this.insert = function(instruction) {
         if (stations.getRS(instruction)) { return; }
-        if (instruction === "NoOp") { return; }
+        if (instruction.name === "NoOp") { return; }
         //rename(instruction, arf);
         rename(instruction, arf);
         if (instruction.type === DATA_TYPES.ARITHMETIC) {
@@ -223,21 +221,6 @@ function RSHandler(size) {
         }).map(rs => { return rs.getInstruction(); });
     }
 
-    // Clear rs of instruction - if instruction has dest, remove from ARF and update original register
-    this.wb = function(instruction) {
-        let rs = stations.getRS(instruction);
-        if (!rs) return;
-        let dest = instruction.params.dest;
-        if (isObject(dest)) {
-        //     stations.update(dest);
-             let originalRegister = arf.remove(dest);
-             if (originalRegister) originalRegister.set(dest.get());
-        //    rs.getODest().set(rs.getResult());
-        }
-        stations.remove(instruction);
-        return true;
-    }
-
     this.execute = function(instruction) {
         let rs = stations.getRS(instruction);
         if (!rs) return;
@@ -254,6 +237,21 @@ function RSHandler(size) {
         if (instruction && isNumber(instruction.storeData)) {
             instruction.params.dest.set(instruction.storeData);
         }
+    }
+
+    // Clear rs of instruction - if instruction has dest, remove from ARF and update original register
+    this.wb = function(instruction) {
+        let rs = stations.getRS(instruction);
+        if (!rs) return;
+        let dest = instruction.params.dest;
+        if (isObject(dest)) {
+        //     stations.update(dest);
+             let originalRegister = arf.remove(dest);
+             if (originalRegister) originalRegister.set(dest.get());
+        //    rs.getODest().set(rs.getResult());
+        }
+        stations.remove(instruction);
+        return true;
     }
 
     this.remove = function(instruction) {
@@ -292,17 +290,17 @@ function rename(instruction, arf) {
     if (source) {
         let temp = arf.get(source);
 //        console.log(source, source.get(), temp || source.get());
-        if (temp.ready) instruction.params.source = temp.get();
+        if (temp && temp.ready) instruction.params.source = temp.get();
         else instruction.params.source = temp || source.get();
     }
     if (source1) {
         var temp = arf.get(source1);
-        if (temp.ready) instruction.params.source1 = temp.get();
+        if (temp && temp.ready) instruction.params.source1 = temp.get();
         else instruction.params.source1 = temp || source1.get();
     }
     if (source2) {
         var temp = arf.get(source2);
-        if (temp.ready) instruction.params.source2 = temp.get();
+        if (temp && temp.ready) instruction.params.source2 = temp.get();
         else instruction.params.source2 = temp || source2.get();
     }
     if (dest) {

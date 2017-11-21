@@ -49,7 +49,7 @@ function StallHandler() {
     }
     this.execute = function(instruction) {
         let i = array.find(item => {return item.instruction === instruction && item.status === 1});
-        i.status = 1;
+        if (i) i.status = 1;
     }
     this.wb = function(instruction) {
         let i = array.find(item => {return item.instruction === instruction && item.status === 1});
